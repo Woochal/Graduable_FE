@@ -49,7 +49,7 @@ interface StoreSchema {
 const isProd = process.env.NODE_ENV === "production";
 
 // 스토어 인스턴스 생성
-const store = new Store<StoreSchema>() as any;
+const store = new Store<StoreSchema>();
 
 // 프로덕션 모드에서는 정적 파일 서빙
 if (isProd) {

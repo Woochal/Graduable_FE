@@ -26,7 +26,7 @@ export function createWindow(
 	// Store 인스턴스 생성 (특정 창의 상태를 저장)
 	const store = new Store<{ [key: string]: WindowState }>({
 		name: windowName,
-	}) as any;
+	});
 
 	// 기본 창 크기 설정
 	const defaultSize = {

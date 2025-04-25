@@ -19,6 +19,11 @@
 		"outDir": "../src/electron", // ✅ 컴파일 결과가 이 위치로 나가게 함
 		"typeRoots": ["../node_modules/@types", "../@types"]
 	},
-	"include": ["*.ts", "../src/types/electron-store.d.ts"],
+	"include": [
+		"*.ts",
+		"../src/types/electron-store.d.ts",
+		"../src/types/electron.d.ts"
+	],
+	// 파일 참조를 통해 global하게 사용
 	"exclude": ["node_modules", "../components", "../public", "../types"]
 }

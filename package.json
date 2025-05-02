@@ -18,7 +18,8 @@
 		"react": "^18",
 		"react-dom": "^18",
 		"react-router-dom": "^7.5.0",
-		"recoil": "^0.7.7"
+		"recoil": "^0.7.7",
+		"styled-components": "^6.1.17"
 	},
 	"devDependencies": {
 		"@eslint/eslintrc": "^3",
@@ -47,7 +48,9 @@
 	"build": {
 		"appId": "com.example.Swproject",
 		"productName": "Swproject",
-		"files": ["src/electron/**/*.js"],
+		"files": [
+			"src/electron/**/*.js"
+		],
 		"win": {
 			"target": "nsis"
 		},

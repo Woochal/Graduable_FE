@@ -1,30 +1,31 @@
 export interface ColorType {
-    bgDefault: string;
-    bgCard: string;
-    borderDefault: string;
-    textPrimary: string;
-    textSub: string;
-    textSelected: string;
-    primary: string;
-    highlightOrange: string;
-    highlightGray: string;
-    highlightPurple: string;
-};
-  
+	bgDefault: string;
+	bgCard: string;
+	borderDefault: string;
+	textPrimary: string;
+	textSub: string;
+	textSelected: string;
+	primary: string;
+	highlightOrange: string;
+	highlightGray: string;
+	highlightPurple: string;
+}
+
 export interface FontStyle {
-    fontSize: string;
-    fontWeight: string;
-};
+	fontSize: string;
+	fontWeight: string;
+}
 
 export interface TypographyType {
-    header: FontStyle;
-    title: FontStyle;
-    contentBold: FontStyle;
-    contentRegular: FontStyle;
-    caption: FontStyle;
-};
-  
+	header: FontStyle;
+	title: FontStyle;
+	contentBold: FontStyle;
+	contentRegular: FontStyle;
+	caption: FontStyle;
+	subtitleb: FontStyle;
+}
+
 export interface ThemeType {
-    color: ColorType;
-    typography: TypographyType;
-};
+	color: ColorType;
+	typography: TypographyType;
+}

@@ -80,12 +80,12 @@ export const CategoryHistoryContainer = styled.div`
   /* border: 1px solid red; */
 `;
 
-export const CategoryTop = styled.div`
+export const CategoryTop = styled.div<{ isFinished: boolean }>`
   width: 100%;
   height: 4.375vw;
   justify-content: center;
   align-items: center;
-  color: ${props => props.isFinished ? props.theme.color.primary : props.theme.color.textMain};
+  color: ${props => props.isFinished ? props.theme.color.primary : props.theme.color.highlightGray};
   font-size: ${props => props.theme.typography.subTitle.fontSize};
   font-weight: ${props => props.theme.typography.subTitle.fontWeight};
   /* border: 1px solid red; */
@@ -100,12 +100,12 @@ export const CreditBar = styled.div`
   /* border: 1px solid red; */
 `;
 
-export const CategoryBottom = styled.div`
+export const CategoryBottom = styled.div<{ isFinished: boolean }>`
   width: 100%;
   height: 3.125vw;
   justify-content: center;
   align-items: center;
-  color: ${props => props.isFinished ? props.theme.color.primary : props.theme.color.textMain};
+  color: ${props => props.isFinished ? props.theme.color.primary : props.theme.color.highlightGray};
   font-size: ${props => props.theme.typography.subTitle.fontSize};
   font-weight: ${props => props.theme.typography.subTitle.fontWeight};
   /* border: 1px solid red; */
@@ -326,7 +326,7 @@ export const CourseTitle = styled.div`
   height: 0.938vw;
   font-size: ${props => props.theme.typography.caption.fontSize};
   font-weight: ${props => props.theme.typography.contentBold.fontWeight};
-  color: ${props => props.theme.color.textMain};
+  color: ${props => props.theme.color.highlightGray};
 `;
 
 export const CourseInformation = styled.div`

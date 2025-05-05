@@ -20,7 +20,7 @@ const Container = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding-left: 14vw;
+  /* padding-left: 14vw; */
 	`;
 
 export default function CourseHistory() {

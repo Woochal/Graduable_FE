@@ -2,8 +2,10 @@ import React from 'react';
 import * as S from '../styled';
 import RoadmapCourse from './RoadmapCourse';
 import { CourseDataType, RoadmapSemesterData } from '../../../../types';
+import { useNavigate } from 'react-router-dom';
 
 const Roadmap = () => {
+  const navigate = useNavigate();
 
   const roadmapCourseData : CourseDataType[] = [
     {
@@ -62,7 +64,9 @@ const Roadmap = () => {
         <S.CourseHistoryTopTitle>
           학기별 로드맵
         </S.CourseHistoryTopTitle>
-        <S.CourseHistoryTopButton>
+        <S.CourseHistoryTopButton onClick={() => {
+          navigate('/roadmap');
+        }}>
           자세히 보기
         </S.CourseHistoryTopButton>
       </S.CourseHistoryTop>

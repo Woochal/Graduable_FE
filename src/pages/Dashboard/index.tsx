@@ -1,10 +1,22 @@
 import React from "react";
 import * as S from "./components/styled";
+import CourseHistory from "./components/course-history/CourseHistory";
+import Roadmap from "./components/roadmap/Roadmap";
+import RemainingCredit from "./components/remaining-credit/RemainingCredit";
+import { RemainingCreditType } from "../../types";
 
-export default function MenuBar() {
+
+const DashboardPage = () => {
+	
 	return (
 		<S.Container>
-			대시보드
+			<S.UpperContainer>
+				<Roadmap />
+				<RemainingCredit />
+			</S.UpperContainer>
+			<CourseHistory />
 		</S.Container>
 	);
 }
+
+export default DashboardPage;

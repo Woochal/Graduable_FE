@@ -14,30 +14,35 @@ export const theme: ThemeType = {
 		highlightPurple: "#A7B4E0",
 	},
 
-	typography: {
-		header: {
-			fontSize: "36px",
-			fontWeight: "bold",
-		},
-		title: {
-			fontSize: "20px",
-			fontWeight: "bold",
-		},
-		contentBold: {
-			fontSize: "15px",
-			fontWeight: "bold",
-		},
-		contentRegular: {
-			fontSize: "15px",
-			fontWeight: "regular",
-		},
-		subtitleb: {
-			fontSize: "15px",
-			fontWeight: "regular",
-		},
-		caption: {
-			fontSize: "11px",
-			fontWeight: "regular",
-		},
-	},
+  typography: {
+      header: {
+        fontSize: '36px',
+        fontWeight: 'bold',
+      },
+      title: {
+        fontSize: '20px',
+        fontWeight: 'bold',
+      },
+      subTitle: {
+        fontSize: '15px',
+        fontWeight: 'bold',
+      },
+      contentBold: {
+        fontSize: '15px',
+        fontWeight: 'bold',
+      },
+      contentRegular: {
+        fontSize: '15px',
+        fontWeight: 'regular',
+      },
+      caption: {
+        fontSize: '11px',
+        fontWeight: 'regular',
+      },
+      subtitleb: {
+        fontSize: "15px",
+        fontWeight: "regular",
+      },
+    },
 };
+  

@@ -30,8 +30,8 @@ export function createWindow(
 
 	// 기본 창 크기 설정
 	const defaultSize = {
-		width: options.width || 2000,
-		height: options.height || 1400,
+		width: options.width || 1280,
+		height: options.height || 832,
 	};
 
 	// 최소 크기 설정 (옵션에 정의되지 않았을 경우 기본값 사용)

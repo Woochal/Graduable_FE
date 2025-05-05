@@ -26,6 +26,10 @@ export const theme: ThemeType = {
           fontSize: '20px',
           fontWeight: 'bold',
         },
+        subTitle: {
+          fontSize: '15px',
+          fontWeight: 'bold',
+        },
         contentBold: {
           fontSize: '15px',
           fontWeight: 'bold',

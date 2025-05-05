@@ -1,6 +1,6 @@
 import React from "react";
 import Layout from "../Layout";
-import DashboardPage from "../pages/Dashboard";
+import DashboardPage from "../pages/dashboard";
 import RoadmapPage from "../pages/Roadmap";
 import CourseHistoryPage from "../pages/CourseHistory";
 import SimulatorPage from "../pages/Simulator";

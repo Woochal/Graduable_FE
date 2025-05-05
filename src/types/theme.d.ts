@@ -19,6 +19,7 @@ export interface FontStyle {
 export interface TypographyType {
     header: FontStyle;
     title: FontStyle;
+    subTitle: FontStyle;
     contentBold: FontStyle;
     contentRegular: FontStyle;
     caption: FontStyle;

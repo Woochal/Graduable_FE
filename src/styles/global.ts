@@ -8,21 +8,26 @@ const GlobalStyles = createGlobalStyle<{ theme: DefaultTheme }>`
   box-sizing: border-box;
 }
 
-body {
+html, body {
+  width: 100%;
+  height: 100vh;
+}
+
+#root {
   width: 100%;
   height: 100%;
+}
+
+body {
   /* font-family: "Pretendard-Regular"; */
-  box-sizing: border-box;
-  overscroll-behavior-y: none;
+  /* overscroll-behavior-y: none; */
   color: ${props => props.theme.color.textPrimary};
   background-color: ${props => props.theme.color.bgDefault};
 }
 
-
 div {
-  display:flex;
+  display: flex;
 }
-
 
 `;
 

@@ -13,9 +13,11 @@
 		"dist": "npm run build && electron-builder"
 	},
 	"dependencies": {
+		"chart.js": "^4.4.9",
 		"electron-serve": "^2.1.1",
 		"electron-store": "^10.0.1",
 		"react": "^18",
+		"react-chartjs-2": "^5.3.0",
 		"react-dom": "^18",
 		"react-router-dom": "^7.5.0",
 		"recoil": "^0.7.7"
@@ -47,7 +49,9 @@
 	"build": {
 		"appId": "com.example.Swproject",
 		"productName": "Swproject",
-		"files": ["src/electron/**/*.js"],
+		"files": [
+			"src/electron/**/*.js"
+		],
 		"win": {
 			"target": "nsis"
 		},

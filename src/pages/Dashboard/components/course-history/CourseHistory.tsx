@@ -2,8 +2,11 @@ import React from 'react';
 import * as S from '../styled';
 import { CategoryHistoryType } from '../../../../types';
 import CategoryHistory from './CategoryHistory';
+import { useNavigate } from 'react-router-dom';
 
 const CourseHistory = () => {
+  
+  const navigate = useNavigate();
 
   const categoryHistory: CategoryHistoryType[] = [
     {
@@ -71,7 +74,9 @@ const CourseHistory = () => {
         <S.CourseHistoryTopTitle>
           수강내역 확인하기
         </S.CourseHistoryTopTitle>
-        <S.CourseHistoryTopButton>
+        <S.CourseHistoryTopButton onClick={() => {
+          navigate('/history');
+        }}>
           자세히 보기
         </S.CourseHistoryTopButton>
       </S.CourseHistoryTop>

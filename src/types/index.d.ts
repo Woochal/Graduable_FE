@@ -22,10 +22,17 @@ export interface RemainingCreditType {
     attendedCredit: number;
 }
 
-export interface RoadmapCourseType {
+export interface CourseDataType {
     name: string;
     credit: number;
     major: boolean;
     professor?: string;
     classroom?: string;
+}
+
+export interface RoadmapSemesterData {
+    year: number;
+    semester: number;
+    semesterN: number;
+    courses: CourseDataType[];
 }

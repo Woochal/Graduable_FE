@@ -1,7 +1,6 @@
-import { createGlobalStyle, DefaultTheme } from "styled-components";
+import { createGlobalStyle, type DefaultTheme } from "styled-components";
 
 const GlobalStyles = createGlobalStyle<{ theme: DefaultTheme }>`
-
 * {
   margin: 0;
   padding: 0;
@@ -21,8 +20,10 @@ html, body {
 body {
   /* font-family: "Pretendard-Regular"; */
   /* overscroll-behavior-y: none; */
-  color: ${props => props.theme.color.textPrimary};
-  background-color: ${props => props.theme.color.bgDefault};
+  box-sizing: border-box;
+  overscroll-behavior-y: none;
+  color: ${(props) => props.theme.color.textPrimary};
+  background-color: ${(props) => props.theme.color.bgDefault};
 }
 
 div {

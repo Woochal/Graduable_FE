@@ -60,7 +60,7 @@ export default function CourseSection({
 	// 색상 결정 함수
 	const getProgressColor = (progress: number) => {
 		if (progress >= 100) return theme.color.primary; // 완료
-		return theme.color.textSub; // 진행 중 (높음)
+		return theme.color.highlightGray; // 진행 중 (높음)
 	};
 
 	// 특정 섹션의 진행 데이터 찾기 함수

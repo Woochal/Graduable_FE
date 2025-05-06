@@ -14,30 +14,37 @@ export function CourseList({ courseList }: CourseBoxProps) {
 			{
 				Header: "구분",
 				accessor: "section", // 키가 실제 SugangCheck 타입과 일치해야 함
+				width: "14%", // 혹은 '100px'와 같이 고정 픽셀 값
 			},
 			{
 				Header: "연도-학기",
 				accessor: "sectionYear",
+				width: "12%",
 			},
 			{
 				Header: "과목코드",
 				accessor: "sectioncode",
+				width: "15%",
 			},
 			{
 				Header: "과목명",
 				accessor: "sectionName",
+				width: "30%", // 과목명에 더 많은 공간 할당
 			},
 			{
 				Header: "학점(설계)",
 				accessor: "sectionCredit",
+				width: "8%",
 			},
 			{
 				Header: "성적",
 				accessor: "sectiongrade",
+				width: "8%",
 			},
 			{
 				Header: "비고",
 				accessor: "remark",
+				width: "15%",
 				Cell: ({ value }: { value: string | null }) =>
 					value ? String(value) : "-",
 			},
@@ -59,7 +66,11 @@ export function CourseList({ courseList }: CourseBoxProps) {
 								key={`header-group-${i}`}
 							>
 								{headerGroup.headers.map((column, j) => (
-									<th {...column.getHeaderProps()} key={`header-${i}-${j}`}>
+									<th
+										{...column.getHeaderProps()}
+										key={`header-${i}-${j}`}
+										style={{ width: column.width }} // 여기서 width 적용
+									>
 										{column.render("Header")}
 									</th>
 								))}
@@ -87,7 +98,7 @@ export function CourseList({ courseList }: CourseBoxProps) {
 									style={{
 										border: "none",
 										borderRight:
-											i < columns.length - 1 ? "1px solid #ffff" : "none",
+											i < columns.length - 1 ? "1px solid #6C6C72" : "none",
 									}}
 								/>
 							))}

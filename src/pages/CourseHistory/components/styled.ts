@@ -33,16 +33,16 @@ export const TableContainer = styled.div`
     }
     
     th {
-      border-bottom: 1px solid #ffff;
+      border-bottom: 1px solid ${(props) => props.theme.color.textSub};
       font-size: ${(props) => props.theme.typography.subtitleb.fontSize};
       font-weight: ${(props) => props.theme.typography.subtitleb.fontWeight};
-      border-right: 1px solid #ffff;
+      border-right: 1px solid ${(props) => props.theme.color.textSub};
     }
     
     td {
       font-size: ${(props) => props.theme.typography.subtitleb.fontSize};
       font-weight: ${(props) => props.theme.typography.subtitleb.fontWeight};
-      border-right: 1px solid #ffff;
+      border-right: 1px solid ${(props) => props.theme.color.textSub};
     }
      
     /* 마지막 열은 오른쪽 테두리 없음 */

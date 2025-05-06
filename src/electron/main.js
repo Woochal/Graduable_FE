@@ -68,9 +68,9 @@ var createMainWindow = function () { return __awaiter(void 0, void 0, void 0, fu
                 //const { width, height } = screen.getPrimaryDisplay().workAreaSize;
                 // 메인 윈도우 생성
                 mainWindow = new electron_1.BrowserWindow({
-                    width: 2000, // 고정된 기본 너비 설정
-                    height: 1400, // 고정된 기본 높이 설정
-                    minWidth: 1200, // 최소 너비 설정
+                    width: 1280, // 고정된 기본 너비 설정
+                    height: 832, // 고정된 기본 높이 설정
+                    minWidth: 1280, // 최소 너비 설정
                     minHeight: 800, // 최소 높이 설정
                     x: windowConfig.x,
                     y: windowConfig.y,
@@ -90,7 +90,7 @@ var createMainWindow = function () { return __awaiter(void 0, void 0, void 0, fu
                 return [4 /*yield*/, mainWindow.loadURL("http://localhost:".concat(port, "/"))];
             case 3:
                 _a.sent();
-                mainWindow.webContents.openDevTools(); // 개발 모드에서 개발자 도구 열기
+                // mainWindow.webContents.openDevTools(); // 개발 모드에서 개발자 도구 열기
                 _a.label = 4;
             case 4:
                 // 창 위치 및 크기 저장

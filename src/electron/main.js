@@ -90,7 +90,7 @@ var createMainWindow = function () { return __awaiter(void 0, void 0, void 0, fu
                 return [4 /*yield*/, mainWindow.loadURL("http://localhost:".concat(port, "/"))];
             case 3:
                 _a.sent();
-                // mainWindow.webContents.openDevTools(); // 개발 모드에서 개발자 도구 열기
+                mainWindow.webContents.openDevTools(); // 개발 모드에서 개발자 도구 열기
                 _a.label = 4;
             case 4:
                 // 창 위치 및 크기 저장

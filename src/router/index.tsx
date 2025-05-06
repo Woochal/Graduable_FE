@@ -1,8 +1,8 @@
 import React from "react";
 import Layout from "../Layout";
-import DashboardPage from "../pages/Dashboard";
+import DashboardPage from "../pages/dashboard";
 import RoadmapPage from "../pages/Roadmap";
-import CourseHistoryPage from "../pages/CourseHistory";
+import CourseHistory from "../pages/coursehistory";
 import SimulatorPage from "../pages/Simulator";
 import CourseHandbookPage from "../pages/CourseHandbook";
 import CurriculumPage from "../pages/Curriculum";
@@ -13,10 +13,10 @@ export const Routing = () => {
 	return (
 		<Router>
 			<Routes>
-				<Route path="/" element={<Layout />} >
+				<Route path="/" element={<Layout />}>
 					<Route index element={<DashboardPage />} />
 					<Route path="/roadmap" element={<RoadmapPage />} />
-					<Route path="/history" element={<CourseHistoryPage />} />
+					<Route path="/history" element={<CourseHistory />} />
 					<Route path="/simulator" element={<SimulatorPage />} />
 					<Route path="/handbook" element={<CourseHandbookPage />} />
 					<Route path="/curriculum" element={<CurriculumPage />} />

@@ -101,10 +101,12 @@ export const SemesterGrid = styled.div`
     width: 100%;
     min-height: calc(250px * 2 + 3rem);
     padding: 0.25rem;
+    padding-top: 1rem;
     justify-content: center;
     align-content: start;
     overflow-y: auto;
-    padding-bottom: 3rem;
+    height: 100%;
+    box-sizing: border-box;
 `;
 
 export const SemesterCard = styled.div`
@@ -240,5 +242,117 @@ export const AddButton = styled.button`
         &::after {
             background-color: rgba(128, 128, 134, 1);
         }
+    }
+`;
+
+export const DeleteButton = styled.button`
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 20px;
+    height: 20px;
+    background-color: rgba(34, 34, 46, 1);
+    border: 1.5px solid rgba(108, 108, 114, 1);
+    border-radius: 50%;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+
+    &::before,
+    &::after {
+        content: '';
+        position: absolute;
+        width: 10px;
+        height: 1.5px;
+        background-color: rgba(108, 108, 114, 1);
+        border-radius: 2px;
+    }
+
+    &::before {
+        transform: rotate(45deg);
+    }
+
+    &::after {
+        transform: rotate(-45deg);
+    }
+
+    &:hover {
+        background-color: rgba(44, 44, 56, 1);
+        border-color: rgba(128, 128, 134, 1);
+
+        &::before,
+        &::after {
+            background-color: rgba(128, 128, 134, 1);
+        }
+    }
+`;
+
+export const ModalOverlay = styled.div`
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+`;
+
+export const ModalContent = styled.div`
+    width: 460.8px;
+    height: 302.25px;
+    background-color: rgba(34, 34, 46, 1);
+    border-radius: 24px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+`;
+
+export const ModalTitle = styled.h2`
+    color: #ffffff;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 36px;
+    line-height: 1.21;
+    margin: 0;
+`;
+
+export const ModalMessage = styled.p`
+    color: #ffffff;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 1.21;
+    margin: 0;
+`;
+
+export const ModalButtons = styled.div`
+    display: flex;
+    gap: 1rem;
+    margin-top: auto;
+    justify-content: flex-end;
+`;
+
+export const ModalButton = styled.button<{ variant: 'cancel' | 'delete' }>`
+    width: 97.09px;
+    height: 43.25px;
+    background-color: ${(props) => (props.variant === 'delete' ? 'rgba(167, 224, 217, 1)' : 'rgba(108, 108, 114, 1)')};
+    color: ${(props) => (props.variant === 'delete' ? '#000000' : '#ffffff')};
+    border: none;
+    border-radius: 7px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+        opacity: 0.9;
     }
 `;

@@ -321,6 +321,7 @@ export const ModalTitle = styled.h2`
     font-size: 36px;
     line-height: 1.21;
     margin: 0;
+    text-align: left;
 `;
 
 export const ModalMessage = styled.p`
@@ -330,6 +331,7 @@ export const ModalMessage = styled.p`
     font-size: 20px;
     line-height: 1.21;
     margin: 0;
+    text-align: left;
 `;
 
 export const ModalButtons = styled.div`

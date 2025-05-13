@@ -28,19 +28,19 @@ const glowAnimation = keyframes`
 `;
 
 export const Container = styled.div`
-    width: min(calc(100% - 14rem), 984.49px);
+    width: 100%;
     height: calc(100vh - 5.5vh - 2rem);
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    margin-left: 14rem;
     padding-top: 5.5vh;
+    margin-left: 2rem;
     box-sizing: border-box;
     overflow: hidden;
 `;
 
 export const CurriculumBox = styled.div`
-    width: 100%;
+    width: 94%;
     height: 100%;
     background-color: rgba(34, 34, 46, 1);
     border-radius: 0.9375rem;

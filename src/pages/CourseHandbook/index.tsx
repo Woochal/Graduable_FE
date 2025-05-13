@@ -1,6 +1,7 @@
+import React from 'react';
 import { Container, HandbookBox, Title, Button, PDFContainer } from './components/styled';
 
-const CourseHandbook: React.FC = () => {
+const CourseHandbook = () => {
     return (
         <Container>
             <HandbookBox>

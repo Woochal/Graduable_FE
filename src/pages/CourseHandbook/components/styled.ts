@@ -1,12 +1,12 @@
 import styled from 'styled-components';
 
 export const Container = styled.div`
-    width: min(calc(100% - 14rem), 984.49px);
+    width: 100%;
     height: calc(100vh - 5.5vh - 2rem);
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    margin-left: 14rem;
+    margin-left: 2rem;
     padding-top: 5.5vh;
     box-sizing: border-box;
     overflow: hidden;
@@ -14,7 +14,7 @@ export const Container = styled.div`
 `;
 
 export const HandbookBox = styled.div`
-    width: 100%;
+    width: 94%;
     height: 85%;
     background-color: rgba(34, 34, 46, 1);
     border-radius: 0.9375rem;

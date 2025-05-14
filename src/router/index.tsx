@@ -10,7 +10,7 @@ import CourseHandbookPage from "../pages/CourseHandbook";
 import CurriculumPage from "../pages/Curriculum";
 import MyPage from "../pages/MyPage";
 import GoogleLogin from "../../src/pages/GoogleLogin/index";
-import GoogleCallback from "../../src/pages/GoogleCallback/index";
+// import GoogleCallback from "../../src/pages/GoogleCallback/index";
 import InitialSetupFlow from "../../src/components/common/Initialsetup/Initialsetupflow";
 import { UserInfo } from "../types/login/login-inform";
 import {
@@ -182,10 +182,10 @@ export const Routing = () => {
 				{/* 구글 로그인 페이지 */}
 				<Route path="/login" element={<GoogleLogin />} />
 
-				{/* OAuth 콜백 페이지 - 웹 환경에서만 사용 */}
+				{/* OAuth 콜백 페이지 - 웹 환경에서만 사용
 				{!isElectron() && (
 					<Route path="/auth/callback" element={<GoogleCallback />} />
-				)}
+				)} */}
 
 				{/* 보호된 라우트들 with 초기 설정 체크 */}
 				<Route

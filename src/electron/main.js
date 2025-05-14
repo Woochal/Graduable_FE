@@ -1,4 +1,37 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -39,45 +72,180 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-// 필요한 모듈 가져오기
+// electron/main.ts
+var dotenv = __importStar(require("dotenv"));
+dotenv.config();
 var electron_1 = require("electron");
 var electron_serve_1 = __importDefault(require("electron-serve"));
 var node_path_1 = __importDefault(require("node:path"));
 var electron_store_1 = __importDefault(require("electron-store"));
-// 프로덕션 환경인지 확인
+var express_1 = __importDefault(require("express"));
+var axios_1 = __importDefault(require("axios"));
 var isProd = process.env.NODE_ENV === "production";
-// 스토어 인스턴스 생성
 var store = new electron_store_1.default();
-// 프로덕션 모드에서는 정적 파일 서빙
+// 개발 환경에서 SSL 인증서 검증 무시
+if (!isProd) {
+    electron_1.app.commandLine.appendSwitch("ignore-certificate-errors");
+    process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
+}
 if (isProd) {
     (0, electron_serve_1.default)({ directory: "out" });
 }
 else {
-    // 개발 모드에서는 별도의 사용자 데이터 경로 사용
     electron_1.app.setPath("userData", "".concat(electron_1.app.getPath("userData"), " (development)"));
 }
-// 메인 윈도우 변수
 var mainWindow = null;
-// 메인 윈도우 생성 함수
+var authWindow = null;
+var authServer = null;
+// 사용 가능한 포트 찾기
+var findAvailablePort = function () {
+    return new Promise(function (resolve) {
+        var server = (0, express_1.default)().listen(0, "localhost", function () {
+            var port = server.address().port;
+            server.close(function () { return resolve(port); });
+        });
+    });
+};
+// OAuth 로컬 서버 시작
+var startAuthServer = function (port) {
+    return new Promise(function (resolve) {
+        var app = (0, express_1.default)();
+        app.get("/auth/callback", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+            var _a, code, error, tokenResponse, access_token, userResponse, userData, error_1;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = req.query, code = _a.code, error = _a.error;
+                        if (error) {
+                            res.send("\n\t\t\t\t\t<html>\n\t\t\t\t\t\t<body>\n\t\t\t\t\t\t\t<h1>\uC778\uC99D \uC2E4\uD328</h1>\n\t\t\t\t\t\t\t<p>".concat(error, "</p>\n\t\t\t\t\t\t</body>\n\t\t\t\t\t</html>\n\t\t\t\t"));
+                            mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("oauth-error", error);
+                            return [2 /*return*/];
+                        }
+                        _b.label = 1;
+                    case 1:
+                        _b.trys.push([1, 4, , 5]);
+                        return [4 /*yield*/, axios_1.default.post("https://oauth2.googleapis.com/token", {
+                                code: code,
+                                client_id: process.env.VITE_GOOGLE_CLIENT_ID,
+                                client_secret: process.env.VITE_GOOGLE_CLIENT_SECRET,
+                                redirect_uri: "http://localhost:".concat(port, "/auth/callback"),
+                                grant_type: "authorization_code",
+                            })];
+                    case 2:
+                        tokenResponse = _b.sent();
+                        access_token = tokenResponse.data.access_token;
+                        return [4 /*yield*/, axios_1.default.get("https://www.googleapis.com/oauth2/v2/userinfo", {
+                                headers: { Authorization: "Bearer ".concat(access_token) },
+                            })];
+                    case 3:
+                        userResponse = _b.sent();
+                        userData = userResponse.data;
+                        // 메인 창으로 사용자 정보 전달
+                        mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("oauth-success", {
+                            googleId: userData.id,
+                            email: userData.email,
+                            name: userData.name,
+                        });
+                        res.send("\n\t\t\t\t\t<html>\n\t\t\t\t\t\t<body>\n\t\t\t\t\t\t\t<h1>\uC778\uC99D \uC131\uACF5!</h1>\n\t\t\t\t\t\t\t<p>\uC774 \uCC3D\uC740 \uC790\uB3D9\uC73C\uB85C \uB2EB\uD799\uB2C8\uB2E4.</p>\n\t\t\t\t\t\t\t<script>\n\t\t\t\t\t\t\t\tsetTimeout(() => { window.close(); }, 1500);\n\t\t\t\t\t\t\t</script>\n\t\t\t\t\t\t</body>\n\t\t\t\t\t</html>\n\t\t\t\t");
+                        return [3 /*break*/, 5];
+                    case 4:
+                        error_1 = _b.sent();
+                        console.error("OAuth 처리 실패:", error_1);
+                        res.status(500).send("인증 처리 중 오류가 발생했습니다.");
+                        mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("oauth-error", "인증 실패");
+                        return [3 /*break*/, 5];
+                    case 5:
+                        if (authWindow && !authWindow.isDestroyed()) {
+                            setTimeout(function () {
+                                authWindow === null || authWindow === void 0 ? void 0 : authWindow.close();
+                            }, 2000);
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        }); });
+        authServer = app.listen(port, "localhost", function () {
+            console.log("OAuth \uC11C\uBC84 \uC2DC\uC791: http://localhost:".concat(port));
+            resolve();
+        });
+    });
+};
+// Google OAuth 창 생성
+var createAuthWindow = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var port, clientId, redirectUri, authUrl, error_2;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 3, , 4]);
+                return [4 /*yield*/, findAvailablePort()];
+            case 1:
+                port = _a.sent();
+                return [4 /*yield*/, startAuthServer(port)];
+            case 2:
+                _a.sent();
+                authWindow = new electron_1.BrowserWindow({
+                    width: 600,
+                    height: 700,
+                    webPreferences: {
+                        nodeIntegration: false,
+                        contextIsolation: true,
+                    },
+                    parent: mainWindow || undefined,
+                    modal: true,
+                });
+                clientId = process.env.VITE_GOOGLE_CLIENT_ID;
+                if (!clientId) {
+                    console.error("Google Client ID가 설정되지 않았습니다!");
+                    mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("oauth-error", "Client ID가 설정되지 않았습니다.");
+                    return [2 /*return*/];
+                }
+                redirectUri = "http://localhost:".concat(port, "/auth/callback");
+                authUrl = "https://accounts.google.com/o/oauth2/v2/auth?" +
+                    "client_id=".concat(clientId, "&") +
+                    "redirect_uri=".concat(encodeURIComponent(redirectUri), "&") +
+                    "response_type=code&" +
+                    "scope=openid email profile&" +
+                    "access_type=offline&" +
+                    "prompt=consent";
+                authWindow.loadURL(authUrl);
+                authWindow.on("closed", function () {
+                    authWindow = null;
+                    if (authServer) {
+                        authServer.close();
+                        authServer = null;
+                    }
+                });
+                return [3 /*break*/, 4];
+            case 3:
+                error_2 = _a.sent();
+                console.error("OAuth 창 생성 실패:", error_2);
+                if (authServer) {
+                    authServer.close();
+                    authServer = null;
+                }
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
+        }
+    });
+}); };
+// 메인 윈도우 생성
 var createMainWindow = function () { return __awaiter(void 0, void 0, void 0, function () {
     var windowConfig, port;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 windowConfig = store.get("window-config") || {};
-                //const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-                // 메인 윈도우 생성
                 mainWindow = new electron_1.BrowserWindow({
-                    width: 1280, // 고정된 기본 너비 설정
-                    height: 832, // 고정된 기본 높이 설정
-                    minWidth: 1280, // 최소 너비 설정
-                    minHeight: 800, // 최소 높이 설정
+                    width: 1280,
+                    height: 832,
+                    minWidth: 1280,
+                    minHeight: 800,
                     x: windowConfig.x,
                     y: windowConfig.y,
                     webPreferences: {
-                        nodeIntegration: false, // 보안을 위해 비활성화
-                        contextIsolation: true, // 보안을 위해 활성화
-                        preload: node_path_1.default.join(__dirname, "preload.js"), // preload 스크립트 경로
+                        nodeIntegration: false,
+                        contextIsolation: true,
+                        preload: node_path_1.default.join(__dirname, "preload.js"),
                     },
                 });
                 if (!isProd) return [3 /*break*/, 2];
@@ -90,10 +258,9 @@ var createMainWindow = function () { return __awaiter(void 0, void 0, void 0, fu
                 return [4 /*yield*/, mainWindow.loadURL("http://localhost:".concat(port, "/"))];
             case 3:
                 _a.sent();
-                mainWindow.webContents.openDevTools(); // 개발 모드에서 개발자 도구 열기
+                mainWindow.webContents.openDevTools();
                 _a.label = 4;
             case 4:
-                // 창 위치 및 크기 저장
                 mainWindow.on("close", function () {
                     if (!(mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.isMaximized())) {
                         var bounds = mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.getBounds();
@@ -102,7 +269,6 @@ var createMainWindow = function () { return __awaiter(void 0, void 0, void 0, fu
                         }
                     }
                 });
-                // 창이 닫힐 때 메인 윈도우 변수 초기화
                 mainWindow.on("closed", function () {
                     mainWindow = null;
                 });
@@ -110,23 +276,31 @@ var createMainWindow = function () { return __awaiter(void 0, void 0, void 0, fu
         }
     });
 }); };
-// IPC 통신 설정: 스토어 값 가져오기
-electron_1.ipcMain.handle("get-store-value", function (_, key, defaultValue) {
-    return store.get(key, defaultValue);
+// IPC 핸들러들
+electron_1.ipcMain.handle("get-store-value", function (_, key) {
+    return store.get(key);
 });
-// IPC 통신 설정: 스토어 값 저장하기
-electron_1.ipcMain.on("set-store-value", function (_, key, value) {
+electron_1.ipcMain.handle("set-store-value", function (_, key, value) {
     store.set(key, value);
 });
-// 앱이 준비되면 메인 윈도우 생성
+electron_1.ipcMain.handle("open-google-auth", function () {
+    createAuthWindow();
+});
+electron_1.ipcMain.handle("remove-store-value", function (_, key) {
+    store.delete(key);
+});
+// 로그아웃 - user와 userInfo 모두 삭제
+electron_1.ipcMain.handle("logout", function () {
+    store.delete("user");
+    store.delete("userInfo");
+});
+// 앱 이벤트 핸들러
 electron_1.app.on("ready", createMainWindow);
-// 모든 창이 닫히면 앱 종료 (macOS 제외)
 electron_1.app.on("window-all-closed", function () {
     if (process.platform !== "darwin") {
         electron_1.app.quit();
     }
 });
-// macOS에서 앱 아이콘 클릭 시 창이 없으면 새로 생성
 electron_1.app.on("activate", function () {
     if (mainWindow === null) {
         createMainWindow();

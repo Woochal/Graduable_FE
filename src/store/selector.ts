@@ -1,20 +1,36 @@
 import { selector } from "recoil";
-import { selectionsAtom, sugangcheckAtom } from "./atom";
+import { selectionsAtom, sugangcheckAtom, filterTypeAtom } from "./atom";
 export const filterSectionSuggestor = selector({
 	key: "filteredSuggestionsSelector",
 	get: ({ get }) => {
 		const selectedSection = get(selectionsAtom);
 		const results = get(sugangcheckAtom);
+		const filterType = get(filterTypeAtom);
 
-		// 선택된 section이 없으면 전체 결과를 반환
-		if (!selectedSection) {
-			return results;
+		let filteredResults = results;
+
+		// 1. 먼저 섹션 필터링 (기본)
+		if (selectedSection) {
+			filteredResults = filteredResults.filter(
+				(result) => result.section === selectedSection,
+			);
 		}
 
-		// section과 정확히 일치하는 결과만 필터링
-		const filteredResults = results.filter(
-			(result) => result.section === selectedSection,
-		);
+		// 2. 추가 타입 필터링 (옵션)
+		if (filterType !== null) {
+			filteredResults = filteredResults.filter((result) => {
+				switch (filterType) {
+					case "교양":
+						return result.section !== "전공주제";
+					case "전공":
+						return result.section === "전공주제";
+					case "설계":
+						return result.subjectNode && result.subjectNode > 0;
+					default:
+						return true;
+				}
+			});
+		}
 
 		return filteredResults;
 	},

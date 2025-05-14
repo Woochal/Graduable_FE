@@ -2,18 +2,29 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 // electron/preload.ts
 var electron_1 = require("electron");
-/*
-main.ts에서 BrowserWindow 생성 시 preload 옵션으로 지정되어, 렌더러 프로세스가 로드되기 전에 실행
-*/
-// 메인 프로세스와 렌더러 프로세스 간의 안전한 통신을 위한 API 노출
+// 렌더러에서 사용할 Electron API 노출
 electron_1.contextBridge.exposeInMainWorld("electronAPI", {
-    // 스토어 관련 함수
-    getStoreValue: function (key, defaultValue) {
-        return electron_1.ipcRenderer.invoke("get-store-value", key, defaultValue);
-    },
+    // Store 관련
+    getStoreValue: function (key) { return electron_1.ipcRenderer.invoke("get-store-value", key); },
     setStoreValue: function (key, value) {
-        return electron_1.ipcRenderer.send("set-store-value", key, value);
+        return electron_1.ipcRenderer.invoke("set-store-value", key, value);
     },
+    removeStoreValue: function (key) {
+        return electron_1.ipcRenderer.invoke("remove-store-value", key);
+    }, // 추가
+    // Auth 관련
+    openGoogleAuth: function () { return electron_1.ipcRenderer.invoke("open-google-auth"); },
+    onOAuthSuccess: function (callback) {
+        electron_1.ipcRenderer.on("oauth-success", function (_, userData) { return callback(userData); });
+    },
+    onOAuthError: function (callback) {
+        electron_1.ipcRenderer.on("oauth-error", function (_, error) { return callback(error); });
+    },
+    removeAuthListeners: function () {
+        electron_1.ipcRenderer.removeAllListeners("oauth-success");
+        electron_1.ipcRenderer.removeAllListeners("oauth-error");
+    },
+    logout: function () { return electron_1.ipcRenderer.invoke("logout"); },
     // 시스템 정보
     versions: {
         node: function () { return process.versions.node; },

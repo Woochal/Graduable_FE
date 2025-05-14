@@ -1,10 +1,6 @@
 import type React from "react";
 import styled from "styled-components";
-import { motion } from "framer-motion";
-import type {
-	section,
-	SugangCheck,
-} from "../../../types/sugangcheck/sugangcheck";
+import type { section } from "../../../types/sugangcheck/sugangcheck";
 import { theme } from "../../../styles/theme";
 import {
 	ProgressContainer,
@@ -13,9 +9,12 @@ import {
 	SectionBox,
 	SectionGrid,
 	Sugangtitle,
+	PerfecSectionInfo,
 	SectionName,
 	SectionInfo,
 } from "./styled";
+import { useRecoilState } from "recoil";
+import { selectionsAtom } from "../../../store/atom";
 interface CourseSectionProps {
 	sectionList: section[];
 	selectedSection: string | null;
@@ -31,10 +30,11 @@ interface SectionProgressData {
 	remainingCredits: number;
 	progressPercentage: number;
 }
-const VerticalProgressBar: React.FC<{ progress: number; color: string }> = ({
-	progress,
-	color,
-}) => {
+interface VerticalProgressBarProps {
+	progress: number;
+	color: string;
+}
+const VerticalProgressBar = ({ progress, color }: VerticalProgressBarProps) => {
 	const clampedProgress = Math.min(Math.max(progress, 0), 100);
 
 	return (
@@ -49,6 +49,13 @@ const VerticalProgressBar: React.FC<{ progress: number; color: string }> = ({
 		</ProgressContainer>
 	);
 };
+
+const Explan = styled.div`
+  font-size: ${(props) => props.theme.typography.subTitle.fontSize};
+  font-weight: ${(props) => props.theme.typography.subTitle.fontWeight};
+  color: ${(props) => props.theme.color.textSub};
+  margin-left: 1.7vw;
+`;
 export default function CourseSection({
 	sectionList,
 	selectedSection,
@@ -57,6 +64,9 @@ export default function CourseSection({
 	//courseList,
 	sectionProgress,
 }: CourseSectionProps) {
+	const [selectedSections, setSelectedSections] = useRecoilState<string | null>(
+		selectionsAtom,
+	);
 	// 색상 결정 함수
 	const getProgressColor = (progress: number) => {
 		if (progress >= 100) return theme.color.primary; // 완료
@@ -81,8 +91,8 @@ export default function CourseSection({
 			{loading ? (
 				<div>데이터를 불러오는 중입니다...</div>
 			) : (
-				<SectionAllBox>
-					<Sugangtitle>수강내역 확인하기</Sugangtitle>
+				<SectionAllBox selected={!!selectedSections}>
+					<Explan>상단의 텍스트는 [잔여학점 / 전체학점] 을 나타냅니다.</Explan>
 					<div style={{ display: "flex", marginTop: "2.5vw" }}>
 						{sectionList.map((sectionItem) => {
 							const progress = findSectionProgress(sectionItem.section);
@@ -103,7 +113,14 @@ export default function CourseSection({
 										$isSelected={selectedSection === sectionItem.section}
 										onClick={() => onSectionClick(sectionItem.section)}
 									>
-										<SectionInfo>{progress.remainingCredits}학점</SectionInfo>
+										{progress.remainingCredits === 0 ? (
+											<PerfecSectionInfo>완료</PerfecSectionInfo>
+										) : (
+											<SectionInfo>
+												{progress.remainingCredits}/{progress.totalCredits}
+											</SectionInfo>
+										)}
+
 										<div
 											style={{
 												padding: "0.8vw",

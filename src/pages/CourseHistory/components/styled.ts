@@ -34,14 +34,14 @@ export const TableContainer = styled.div`
     
     th {
       border-bottom: 1px solid ${(props) => props.theme.color.textSub};
-      font-size: ${(props) => props.theme.typography.subtitleb.fontSize};
-      font-weight: ${(props) => props.theme.typography.subtitleb.fontWeight};
+      font-size: ${(props) => props.theme.typography.subTitle.fontSize};
+      font-weight: ${(props) => props.theme.typography.subTitle.fontWeight};
       border-right: 1px solid ${(props) => props.theme.color.textSub};
     }
     
     td {
-      font-size: ${(props) => props.theme.typography.subtitleb.fontSize};
-      font-weight: ${(props) => props.theme.typography.subtitleb.fontWeight};
+      font-size: ${(props) => props.theme.typography.subTitle.fontSize};
+      font-weight: ${(props) => props.theme.typography.subTitle.fontWeight};
       border-right: 1px solid ${(props) => props.theme.color.textSub};
     }
      
@@ -74,18 +74,26 @@ export const SectionGrid = styled.div`
   border-radius: 15px;
   background-color: ${(props) => props.theme.color.bgCard};
 `;
-export const Sugangtitle = styled.p`
+export const Sugangtitle = styled.div`
+width: auto;
+
+  margin-top: 1.5vw;
   width: 12.0914vw;
   height: 1.8750vw;
   color: #FFFFFF;
   font-size: ${(props) => props.theme.typography.title.fontSize};
   font-weight: ${(props) => props.theme.typography.title.fontWeight};
+ 
 `;
 interface SectionBoxProps {
 	$isSelected: boolean; // DOM요소 전달 아닌 스타일링에 사용
 }
 
-export const SectionAllBox = styled.div`
+interface SectionAllBoxProps {
+	selected?: boolean; // 선택 여부를 나타내는 속성
+}
+
+export const SectionAllBox = styled.div<SectionAllBoxProps>`
 
   width: auto;
   margin-top: 1.25vw;
@@ -94,6 +102,7 @@ export const SectionAllBox = styled.div`
   display: flex;
   flex-direction: column;
 
+  opacity: ${(props) => (props.selected ? 1 : 0.6)}; // 선택되지 않은 항목은 불투명도 낮춤
 `;
 export const SectionBox = styled.div<SectionBoxProps>`
 display: flex;
@@ -113,8 +122,8 @@ opacity: ${(props) => (props.$isSelected ? 1 : 0.6)}; // 선택되지 않은 항
 
 export const SectionName = styled.div<SectionBoxProps>`
 
-font-size: ${(props) => props.theme.typography.subtitleb.fontSize};
-  font-weight: ${(props) => props.theme.typography.subtitleb.fontWeight};
+font-size: ${(props) => props.theme.typography.subTitle.fontSize};
+  font-weight: ${(props) => props.theme.typography.subTitle.fontWeight};
   margin-top: 1.5vw;
   color: ${(props) => (props.$isSelected ? props.theme.color.highlightOrange : "#FFFFFF")};
 `;
@@ -123,10 +132,21 @@ export const SectionInfo = styled.div`
   display: flex;
   flex-direction: column;
   margin-top: 2vw;
-  font-size: ${(props) => props.theme.typography.subtitleb.fontSize};
-  font-weight: ${(props) => props.theme.typography.subtitleb.fontWeight};
+  font-size: ${(props) => props.theme.typography.subTitle.fontSize};
+  font-weight: ${(props) => props.theme.typography.subTitle.fontWeight};
   text-align: center;
   color: #FFFFFF;
+
+`;
+
+export const PerfecSectionInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-top: 2vw;
+  font-size: ${(props) => props.theme.typography.subTitle.fontSize};
+  font-weight: ${(props) => props.theme.typography.subTitle.fontWeight};
+  text-align: center;
+  color: ${(props) => props.theme.color.primary};
 
 `;
 

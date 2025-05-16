@@ -26,6 +26,4 @@ dist-ssr
 # TypeScript build info
 *.tsbuildinfo
 
-# Package.json
-package.json
-package-lock.json
+

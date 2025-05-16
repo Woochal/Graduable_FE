@@ -14,6 +14,7 @@ export const sectionData: section[] = [
 
 export const sectionDetailData: SugangCheck[] = [
 	// 전공주제 (Major Subjects) courses
+
 	{
 		section: "전공주제",
 		sectionYear: "2021-1",
@@ -22,15 +23,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "전필",
 		sectionCredit: 3,
 		sectiongrade: "A-",
-	},
-	{
-		section: "전공주제",
-		sectionYear: "2021-1",
-		sectioncode: "GEK90058",
-		sectionName: "전공기초세미나",
-		sectionType: "전필",
-		sectionCredit: 3,
-		sectiongrade: "A-",
+		subjectNode: 2,
 	},
 	{
 		section: "전공주제",
@@ -40,16 +33,9 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "전필",
 		sectionCredit: 3,
 		sectiongrade: "A-",
+		subjectNode: 2,
 	},
-	{
-		section: "전공주제",
-		sectionYear: "2021-1",
-		sectioncode: "GEK90059",
-		sectionName: "소프트웨어 설계",
-		sectionType: "전선",
-		sectionCredit: 3,
-		sectiongrade: "B+",
-	},
+
 	{
 		section: "전공주제",
 		sectionYear: "2021-2",
@@ -58,6 +44,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "전필",
 		sectionCredit: 3,
 		sectiongrade: "A",
+		subjectNode: 2,
 	},
 	{
 		section: "전공주제",
@@ -67,6 +54,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "전선",
 		sectionCredit: 3,
 		sectiongrade: "A+",
+		subjectNode: 2,
 	},
 	{
 		section: "전공주제",
@@ -76,6 +64,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "전필",
 		sectionCredit: 3,
 		sectiongrade: "B",
+		subjectNode: 0,
 	},
 	{
 		section: "전공주제",
@@ -85,6 +74,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "전선",
 		sectionCredit: 3,
 		sectiongrade: "A-",
+		subjectNode: 0,
 	},
 	{
 		section: "전공주제",
@@ -94,6 +84,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "전필",
 		sectionCredit: 3,
 		sectiongrade: "A",
+		subjectNode: 0,
 	},
 	{
 		section: "전공주제",
@@ -103,6 +94,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "전선",
 		sectionCredit: 3,
 		sectiongrade: "B+",
+		subjectNode: 0,
 	},
 	{
 		section: "전공주제",
@@ -112,6 +104,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "전필",
 		sectionCredit: 3,
 		sectiongrade: "A",
+		subjectNode: 0,
 	},
 	{
 		section: "전공주제",
@@ -121,6 +114,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "전선",
 		sectionCredit: 3,
 		sectiongrade: "A+",
+		subjectNode: 0,
 	},
 	{
 		section: "전공주제",
@@ -130,6 +124,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "전필",
 		sectionCredit: 3,
 		sectiongrade: "B",
+		subjectNode: 0,
 	},
 	{
 		section: "전공주제",
@@ -139,6 +134,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "전선",
 		sectionCredit: 3,
 		sectiongrade: "A-",
+		subjectNode: 0,
 	},
 	{
 		section: "전공주제",
@@ -148,6 +144,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "전필",
 		sectionCredit: 3,
 		sectiongrade: "A",
+		subjectNode: 0,
 	},
 	{
 		section: "전공주제",
@@ -157,6 +154,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "전선",
 		sectionCredit: 3,
 		sectiongrade: "B+",
+		subjectNode: 0,
 	},
 	{
 		section: "전공주제",
@@ -166,6 +164,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "전필",
 		sectionCredit: 3,
 		sectiongrade: "A+",
+		subjectNode: 0,
 	},
 	{
 		section: "전공주제",
@@ -175,6 +174,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "전선",
 		sectionCredit: 3,
 		sectiongrade: "A",
+		subjectNode: 0,
 	},
 	{
 		section: "전공주제",
@@ -184,6 +184,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "전필",
 		sectionCredit: 3,
 		sectiongrade: "B",
+		subjectNode: 0,
 	},
 	{
 		section: "전공주제",
@@ -193,6 +194,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "전선",
 		sectionCredit: 3,
 		sectiongrade: "A-",
+		subjectNode: 0,
 	},
 	{
 		section: "전공주제",
@@ -202,6 +204,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "전필",
 		sectionCredit: 3,
 		sectiongrade: "A",
+		subjectNode: 0,
 	},
 
 	// 신영및세계관 (Faith and Worldview) courses
@@ -214,6 +217,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "교필",
 		sectionCredit: 3,
 		sectiongrade: "A",
+		subjectNode: 0,
 	},
 	{
 		section: "신앙 및 세계관",
@@ -223,6 +227,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "교선필",
 		sectionCredit: 3,
 		sectiongrade: "B+",
+		subjectNode: 0,
 	},
 
 	// 인성및리더십 (Character and Leadership) courses
@@ -235,6 +240,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "교필",
 		sectionCredit: 3,
 		sectiongrade: "B+",
+		subjectNode: 0,
 	},
 	{
 		section: "인성및리더십",
@@ -244,6 +250,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "교선필",
 		sectionCredit: 2,
 		sectiongrade: "A+",
+		subjectNode: 0,
 	},
 
 	// 실무영어 (Practical English) courses
@@ -255,6 +262,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "교필",
 		sectionCredit: 3,
 		sectiongrade: "A-",
+		subjectNode: 0,
 	},
 	{
 		section: "실무영어",
@@ -264,6 +272,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "교선필",
 		sectionCredit: 3,
 		sectiongrade: "B+",
+		subjectNode: 0,
 	},
 	{
 		section: "실무영어",
@@ -273,6 +282,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "교필",
 		sectionCredit: 3,
 		sectiongrade: "A",
+		subjectNode: 0,
 	},
 
 	{
@@ -283,6 +293,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "교선필",
 		sectionCredit: 2,
 		sectiongrade: "B+",
+		subjectNode: 0,
 	},
 	{
 		section: "전문교양",
@@ -292,6 +303,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "교필",
 		sectionCredit: 3,
 		sectiongrade: "A+",
+		subjectNode: 0,
 	},
 
 	// BSM (Basic Science and Mathematics) courses
@@ -303,6 +315,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "교필",
 		sectionCredit: 3,
 		sectiongrade: "B+",
+		subjectNode: 0,
 	},
 	{
 		section: "BSM",
@@ -312,6 +325,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "교선필",
 		sectionCredit: 3,
 		sectiongrade: "A-",
+		subjectNode: 0,
 	},
 	{
 		section: "BSM",
@@ -321,6 +335,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "교필",
 		sectionCredit: 3,
 		sectiongrade: "A",
+		subjectNode: 0,
 	},
 	{
 		section: "BSM",
@@ -330,6 +345,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "교선필",
 		sectionCredit: 3,
 		sectiongrade: "B+",
+		subjectNode: 0,
 	},
 	{
 		section: "BSM",
@@ -339,6 +355,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "교필",
 		sectionCredit: 3,
 		sectiongrade: "A",
+		subjectNode: 0,
 	},
 	{
 		section: "BSM",
@@ -348,6 +365,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "교선필",
 		sectionCredit: 3,
 		sectiongrade: "A+",
+		subjectNode: 0,
 	},
 
 	// ICT융합기초 (ICT Convergence Basics) courses
@@ -359,6 +377,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "교필",
 		sectionCredit: 2,
 		sectiongrade: "A-",
+		subjectNode: 0,
 	},
 
 	{
@@ -369,6 +388,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "자선",
 		sectionCredit: 3,
 		sectiongrade: "A-",
+		subjectNode: 0,
 	},
 	{
 		section: "자유선택",
@@ -378,6 +398,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "자선",
 		sectionCredit: 3,
 		sectiongrade: "A",
+		subjectNode: 0,
 	},
 	{
 		section: "자유선택",
@@ -387,6 +408,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "자선",
 		sectionCredit: 2,
 		sectiongrade: "B+",
+		subjectNode: 0,
 	},
 	{
 		section: "자유선택",
@@ -396,6 +418,7 @@ export const sectionDetailData: SugangCheck[] = [
 		sectionType: "자선",
 		sectionCredit: 1,
 		sectiongrade: "A",
+		subjectNode: 0,
 	},
 
 	// 전공주제 (Major Subjects) courses

@@ -1,7 +1,9 @@
+// CourseHistory.tsx 수정
 import React, { useCallback } from "react";
 import * as S from "./components/styled";
 import CourseSection from "./components/CourseSection";
 import { CourseList } from "./components/CouseList";
+import CourseFilter from "./components/CourseFilter";
 import styled from "styled-components";
 import { useEffect, useState } from "react";
 import { useSetRecoilState, useRecoilValue } from "recoil";
@@ -9,19 +11,27 @@ import {
 	selectionsAtom,
 	sugangcheckAtom,
 	sectionsAtom,
+	filterTypeAtom, // 추가
 } from "../../store/atom";
 import { filterSectionSuggestor } from "../../store/selector";
 import { sectionData, sectionDetailData } from "../../mockdata";
 import type { section, SugangCheck } from "../../types/sugangcheck/sugangcheck";
-
+import { Sugangtitle } from "./components/styled";
 const Container = styled.div`
   width: 100%;
   height: 100%;
   flex-direction: column;
   justify-content: center;
+margin-left: 2rem;
+`;
+
+const FilterWrapper = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  /* padding-left: 14vw; */
-	`;
+
+`;
 
 export default function CourseHistory() {
 	const [selectedSection, setSelectedSection] = useState<string | null>(null);
@@ -31,6 +41,7 @@ export default function CourseHistory() {
 	const setSelections = useSetRecoilState<string | null>(selectionsAtom);
 	const setSugangCheck = useSetRecoilState(sugangcheckAtom);
 	const setSections = useSetRecoilState(sectionsAtom);
+	const setFilterType = useSetRecoilState(filterTypeAtom); // 추가
 	const courseList = useRecoilValue(filterSectionSuggestor);
 	const [sectionProgress, setSectionProgress] = useState<
 		{
@@ -60,7 +71,7 @@ export default function CourseHistory() {
 				// 기본값으로 첫 번째 섹션 선택
 				if (response.length > 0) {
 					const defaultSection = response[0].section;
-					setSelectedSection(defaultSection); // 섹션 별 정보
+					setSelectedSection(defaultSection);
 					setSelections(defaultSection);
 				}
 
@@ -72,30 +83,23 @@ export default function CourseHistory() {
 				});
 
 				setSugangCheck(detailResponse);
-				setSugangCheckList(detailResponse); // 전체 수강 정보
+				setSugangCheckList(detailResponse);
 				setLoading(false);
 
 				// 각 섹션별 진행률 계산
 				const progressDate = response.map((sectionItem) => {
-					// 섹션 별 과목 필터링
 					const sectionCourses = detailResponse.filter(
 						(course) => course.section === sectionItem.section,
 					);
-					// 섹션 별 이수학점 계산
 					const completedCredits = sectionCourses.reduce(
 						(total, course) => total + course.sectionCredit,
 						0,
 					);
-
-					// 섹션 별 총학점 계산
-
 					const totalCredits = sectionItem.sectiontotal;
-					// 진행률 (100%를 넘지 않도록)
 					const progressPercentage = Math.min(
 						(completedCredits / totalCredits) * 100,
 						100,
 					);
-
 					const remainingCredits = Math.max(totalCredits - completedCredits, 0);
 
 					return {
@@ -120,13 +124,18 @@ export default function CourseHistory() {
 		(sectionName: string) => {
 			setSelectedSection(sectionName);
 			setSelections(sectionName);
+			// 섹션 클릭 시 필터 타입 초기화
+			setFilterType(null);
 		},
-		[setSelections],
+		[setSelections, setFilterType],
 	);
 
-	console.log(sectionProgress);
 	return (
 		<Container>
+			<Sugangtitle>수강내역 확인하기</Sugangtitle>
+			<FilterWrapper>
+				<CourseFilter />
+			</FilterWrapper>
 			<CourseSection
 				sectionList={sectionList}
 				selectedSection={selectedSection}

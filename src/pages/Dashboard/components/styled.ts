@@ -19,7 +19,7 @@ export const UpperContainer = styled.div`
 
 export const CourseHistoryContainer = styled.div`
     width: 76.875vw;
-    height: 28.125vw;
+    height: 28.438vw;
     flex-direction: column;
     align-items: center;
     background-color: ${(props) => props.theme.color.bgCard};
@@ -37,12 +37,29 @@ export const CourseHistoryTop = styled.div`
 `;
 
 export const CourseHistoryTopTitle = styled.div`
-    width: 12.109vw;
+    width: 37.5vw;
     height: 100%;
+    justify-content: space-between;
     align-items: center;
     font-size: ${(props) => props.theme.typography.title.fontSize};
     font-weight: ${(props) => props.theme.typography.title.fontWeight};
     /* border: 1px solid red; */
+`;
+
+export const RoadMapTopTitle = styled.div`
+    width: 17.5vw;
+    height: 100%;
+    justify-content: space-between;
+    align-items: center;
+    font-size: ${(props) => props.theme.typography.title.fontSize};
+    font-weight: ${(props) => props.theme.typography.title.fontWeight};
+    /* border: 1px solid red; */
+`;
+
+export const CourseHistoryTopTitleSpan = styled.span`
+    font-size: ${(props) => props.theme.typography.subTitle.fontSize};
+    font-weight: ${(props) => props.theme.typography.subTitle.fontWeight};
+    color: ${(props) => props.theme.color.textSub};
 `;
 
 export const CourseHistoryTopButton = styled.div`
@@ -71,26 +88,33 @@ export const CourseHistoryContent = styled.div`
 export const CategoryHistoryContainer = styled.div`
     /* flex: 1; */
     width: 8.32vw;
-    height: 20.625vw;
+    height: 21.25vw;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    border-radius: 1.172vw;
-    background-color: ${(props) => props.theme.color.bgDefault};
+    justify-content: space-between;
     /* border: 1px solid red; */
 `;
 
 export const CategoryTop = styled.div<{ isFinished: boolean }>`
     width: 100%;
-    height: 4.375vw;
+    height: 18.125vw;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     color: ${(props) => (props.isFinished ? props.theme.color.primary : props.theme.color.highlightGray)};
     font-size: ${(props) => props.theme.typography.subTitle.fontSize};
     font-weight: ${(props) => props.theme.typography.subTitle.fontWeight};
+    background-color: ${(props) => props.theme.color.bgDefault};
+    border-radius: 1.172vw;
     /* border: 1px solid red; */
 `;
 
+export const CategoryTopText = styled.div<{ isFinished: boolean }>`
+    width: 100%;
+    height: 3.75vw;
+    justify-content: center;
+    align-items: center;
+`;
 export const CreditBar = styled.div`
     width: 100%;
     height: 13.125vw;
@@ -104,8 +128,8 @@ export const CategoryBottom = styled.div<{ isFinished: boolean }>`
     width: 100%;
     height: 3.125vw;
     justify-content: center;
-    align-items: center;
-    color: ${(props) => (props.isFinished ? props.theme.color.primary : props.theme.color.highlightGray)};
+    align-items: end;
+    color: ${(props) => (props.isFinished ? props.theme.color.primary : props.theme.color.textSub)};
     font-size: ${(props) => props.theme.typography.subTitle.fontSize};
     font-weight: ${(props) => props.theme.typography.subTitle.fontWeight};
     /* border: 1px solid red; */
@@ -150,31 +174,43 @@ export const RemainingCreditContent = styled(CourseHistoryContent)`
 `;
 
 export const RemainingCreditContentLeft = styled.div`
-    width: 40%;
+    width: 45%;
     height: 100%;
     flex-direction: column;
-    /* justify-content: center; */
+    justify-content: center;
     /* align-items: center; */
     /* border: 1px solid red; */
 `;
 
 export const RemainingCreditContentRight = styled.div`
-    width: 60%;
+    width: 55%;
     height: 100%;
     justify-content: end;
-    /* align-items: center; */
+    align-items: end;
     padding-right: 1.25vw;
+    padding-bottom: 1.25vw;
     position: relative;
+    border-left: 2px solid ${(props) => props.theme.color.borderDefault};
     /* border: 1px solid blue; */
 `;
 
+export const RemainingCreditDetailPercent = styled.div`
+    width: 14.063vw;
+    height: 1.875vw;
+    justify-content: center;
+    align-items: center;
+    font-size: ${(props) => props.theme.typography.subTitle.fontSize};
+    font-weight: ${(props) => props.theme.typography.subTitle.fontWeight};
+    color: ${(props) => props.theme.color.textSub};
+    /* border: 1px solid blue; */
+`;
 export const RemainingCreditText = styled.div`
     width: 11.719vw;
     height: 3.438vw;
     font-size: ${(props) => props.theme.typography.header.fontSize};
     font-weight: ${(props) => props.theme.typography.header.fontWeight};
     color: ${(props) => props.theme.color.primary};
-    margin: 3.125vw 0 0.938vw 1.563vw;
+    margin: 0 0 0.938vw 0.781vw;
     /* border: 1px solid red; */
 `;
 
@@ -186,12 +222,13 @@ export const RemainingCreditDetail = styled.div`
     color: ${(props) => props.theme.color.textSub};
     text-align: start;
     line-height: 1.953vw;
-    margin-left: 1.563vw;
+    margin-left: 0.781vw;
+    /* border: 1px solid black; */
 `;
 
 export const CreditDonutContainer = styled.div`
-    width: 15.625vw;
-    height: 15.625vw;
+    width: 14.063vw;
+    height: 14.063vw;
     position: absolute;
     top: -0.938vw;
     justify-content: center;
@@ -199,8 +236,8 @@ export const CreditDonutContainer = styled.div`
 `;
 
 export const CreditDonut = styled.div`
-    width: 15.625vw;
-    height: 15.625vw;
+    width: 14.063vw;
+    height: 14.063vw;
     position: absolute;
     justify-content: center;
     align-items: center;
@@ -212,9 +249,9 @@ export const CreditDonut = styled.div`
 `;
 
 export const CreditDonutText = styled.div`
-    width: 12.5vw;
-    height: 12.5vw;
-    top: calc((15.625vw - 12.5vw) / 2);
+    width: 11.25vw;
+    height: 11.25vw;
+    top: calc((14.063vw - 11.25vw) / 2);
     position: absolute;
     justify-content: center;
     align-items: center;

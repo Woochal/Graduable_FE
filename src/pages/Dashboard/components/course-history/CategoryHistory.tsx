@@ -9,11 +9,14 @@ const CategoryHistory = ({ categoryData }: { categoryData: CategoryHistoryType }
   return (
     <S.CategoryHistoryContainer>
       <S.CategoryTop isFinished={categoryData.isFinished}>
-        {categoryData.isFinished ? "완료" : `${categoryData.credit} / ${categoryData.maxCredit}` }
+        <S.CategoryTopText isFinished={categoryData.isFinished}>
+          {categoryData.isFinished ? "완료" : `${categoryData.credit} / ${categoryData.maxCredit}` }
+        </S.CategoryTopText>
+        <S.CreditBar>
+          <CreditBar categoryData={categoryData} />
+        </S.CreditBar>
       </S.CategoryTop>
-      <S.CreditBar isFinished={categoryData.isFinished}>
-        <CreditBar categoryData={categoryData} />
-      </S.CreditBar>
+     
       <S.CategoryBottom isFinished={categoryData.isFinished}>{categoryData.name }</S.CategoryBottom>
     </S.CategoryHistoryContainer>
   );

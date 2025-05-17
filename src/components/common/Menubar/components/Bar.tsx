@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import * as S from "./styled";
 import MenuItem from "./MenuItem";
 import type { MenuItemType } from "../../../../types";
-
+import logo from "../../../../assets/Logo.png";
 const Bar = () => {
 	const navigate = useNavigate();
 	const location = useLocation();
@@ -31,6 +31,12 @@ const Bar = () => {
 					</MenuItem>
 				))}
 			</S.MenuContainer>
+			<S.UserInfo>
+				<S.Logo>
+					<S.LogoImage src={logo} alt="logo" />
+				</S.Logo>
+				<S.UserName>김하람</S.UserName>
+			</S.UserInfo>
 		</S.BarContainer>
 	);
 };

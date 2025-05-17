@@ -41,7 +41,7 @@ export const theme: ThemeType = {
       },
       subtitleb: {
         fontSize: "15px",
-        fontWeight: "regular",
+        fontWeight: "bold",
       },
     },
 };

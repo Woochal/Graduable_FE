@@ -202,6 +202,7 @@ const createMainWindow = async () => {
 		height: 832,
 		minWidth: 1280,
 		minHeight: 800,
+		useContentSize: true, // width/height가 콘텐츠 크기만으로 되도록. 이거 없으면 앱 상단 메뉴도 포함되서 계산됨
 		x: windowConfig.x,
 		y: windowConfig.y,
 		webPreferences: {
@@ -216,8 +217,20 @@ const createMainWindow = async () => {
 	} else {
 		const port = process.argv[2] || 5173;
 		await mainWindow.loadURL(`http://localhost:${port}/`);
-		mainWindow.webContents.openDevTools();
+		// mainWindow.webContents.openDevTools();
 	}
+
+	// 창 크기 로그 출력
+	const size = mainWindow.getSize();
+	console.log(`Window size: ${size[0]}x${size[1]}`);
+	
+	// // 창 크기 변경 시 로그 출력
+	// mainWindow.on('resize', () => {
+	// 	const newSize = mainWindow?.getSize();
+	// 	if (newSize) {
+	// 		console.log(`Window resized: ${newSize[0]}x${newSize[1]}`);
+	// 	}
+	// });
 
 	mainWindow.on("close", () => {
 		if (!mainWindow?.isMaximized()) {

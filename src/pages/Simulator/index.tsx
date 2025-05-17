@@ -1,10 +1,13 @@
 import React from "react";
 import * as S from "./components/styled";
+import AddSemester from "./components/add-semester/AddSemester";
+import GraduationSimulator from "./components/graduation-simulator/GraduationSimulator";
 
-export default function MenuBar() {
+export default function Simulator() {
 	return (
 		<S.Container>
-			졸업심사 시뮬레이터
+			<AddSemester />
+			<GraduationSimulator />
 		</S.Container>
 	);
 }

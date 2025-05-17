@@ -73,6 +73,9 @@ const CourseHistory = () => {
       <S.CourseHistoryTop>
         <S.CourseHistoryTopTitle>
           수강내역 확인하기
+          <S.CourseHistoryTopTitleSpan>
+            상단의 텍스트는 [잔여학점 / 전체학점] 을 나타냅니다.
+          </S.CourseHistoryTopTitleSpan>
         </S.CourseHistoryTopTitle>
         <S.CourseHistoryTopButton onClick={() => {
           navigate('/history');

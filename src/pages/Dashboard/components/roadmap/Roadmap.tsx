@@ -61,9 +61,9 @@ const Roadmap = () => {
     <S.RoadmapContainer>
 
       <S.CourseHistoryTop>
-        <S.CourseHistoryTopTitle>
+        <S.RoadMapTopTitle>
           학기별 로드맵
-        </S.CourseHistoryTopTitle>
+        </S.RoadMapTopTitle>
         <S.CourseHistoryTopButton onClick={() => {
           navigate('/roadmap');
         }}>
@@ -93,7 +93,7 @@ const Roadmap = () => {
         </S.CourseInformation>
 
         <S.RoadmapSemester>
-          {roadmapSemesterData.year}-{roadmapSemesterData.semester} {roadmapSemesterData.semesterN}학기
+          {roadmapSemesterData.semesterN}학기 ({roadmapSemesterData.year}년 {roadmapSemesterData.semester}학기)
         </S.RoadmapSemester>
 
       </S.RoadmapContent>

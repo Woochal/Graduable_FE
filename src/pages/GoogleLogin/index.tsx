@@ -211,18 +211,19 @@ export default function GoogleLogin() {
                 if (!storedUserInfo) {
                     try {
                         console.log('Fetching user info from server in background');
-                        const response = await axios.get(
-                            `${import.meta.env.VITE_API_URL}/user/info/${userData.googleId}`
-                        );
-                        if (response.data) {
-                            console.log('Received user info from server:', response.data);
-                            await window.electronAPI.setStoreValue(`userInfo_${userData.googleId}`, response.data);
+                        const serverUrl = import.meta.env.VITE_SERVER_URL;
+                        if (serverUrl) {
+                            const response = await axios.get(`${serverUrl}/user/info/${userData.googleId}`);
+                            if (response.data) {
+                                console.log('Received user info from server:', response.data);
+                                await window.electronAPI.setStoreValue(`userInfo_${userData.googleId}`, response.data);
 
-                            // 저장 후 확인
-                            const savedUserInfo = await window.electronAPI.getStoreValue(
-                                `userInfo_${userData.googleId}`
-                            );
-                            console.log('Saved user info from server:', savedUserInfo);
+                                // 저장 후 확인
+                                const savedUserInfo = await window.electronAPI.getStoreValue(
+                                    `userInfo_${userData.googleId}`
+                                );
+                                console.log('Saved user info from server:', savedUserInfo);
+                            }
                         }
                     } catch (error) {
                         console.error('Failed to fetch user info from server:', error);
@@ -256,12 +257,13 @@ export default function GoogleLogin() {
                 if (!storedUserInfo) {
                     try {
                         console.log('Fetching user info from server in background');
-                        const response = await axios.get(
-                            `${import.meta.env.VITE_API_URL}/user/info/${userData.googleId}`
-                        );
-                        if (response.data) {
-                            localStorage.setItem(`userInfo_${userData.googleId}`, JSON.stringify(response.data));
-                            console.log('User info saved from server:', response.data);
+                        const serverUrl = import.meta.env.VITE_SERVER_URL;
+                        if (serverUrl) {
+                            const response = await axios.get(`${serverUrl}/user/info/${userData.googleId}`);
+                            if (response.data) {
+                                localStorage.setItem(`userInfo_${userData.googleId}`, JSON.stringify(response.data));
+                                console.log('User info saved from server:', response.data);
+                            }
                         }
                     } catch (error) {
                         console.error('Failed to fetch user info from server:', error);

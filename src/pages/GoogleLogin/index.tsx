@@ -109,7 +109,7 @@ export default function GoogleLogin() {
 
 			// 3. 로컬에 없고 서버가 있으면 서버에서 확인
 			if (!existingUserInfo) {
-				const serverUrl = import.meta.env.VITE_API_URL;
+				const serverUrl = import.meta.env.VITE_SERVER_URL;
 				if (serverUrl) {
 					// 서버가 있을 때만
 					try {

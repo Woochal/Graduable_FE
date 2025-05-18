@@ -130,9 +130,9 @@ export const Routing = () => {
                 >
                     <Route index element={<DashboardPage />} />
                     <Route path="/roadmap" element={<RoadmapPage />} />
-                    <Route path="/course-history" element={<CourseHistory />} />
+                    <Route path="/history" element={<CourseHistory />} />
                     <Route path="/simulator" element={<SimulatorPage />} />
-                    <Route path="/course-handbook" element={<CourseHandbookPage />} />
+                    <Route path="/handbook" element={<CourseHandbookPage />} />
                     <Route path="/curriculum" element={<CurriculumPage />} />
                     <Route path="/mypage" element={<MyPage />} />
                 </Route>

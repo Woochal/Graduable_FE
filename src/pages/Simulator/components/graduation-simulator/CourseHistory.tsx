@@ -1,6 +1,6 @@
 import React from 'react';
 import * as S from '../styled';
-import { CategoryHistoryType } from '../../../../types';
+import { CategoryDataType } from '../../../../types/simulator/simulator';
 import CategoryHistory from './CategoryHistory';
 import { useNavigate } from 'react-router-dom';
 
@@ -8,7 +8,7 @@ const CourseHistory = () => {
   
   const navigate = useNavigate();
 
-  const categoryHistory: CategoryHistoryType[] = [
+  const categoryHistory: CategoryDataType[] = [
     {
       id: 1,
       name: '신앙및세계관',
@@ -70,19 +70,6 @@ const CourseHistory = () => {
 
   return (
     <S.CourseHistoryContainer>
-      <S.CourseHistoryTop>
-        <S.CourseHistoryTopTitle>
-          수강내역 확인하기
-          <S.CourseHistoryTopTitleSpan>
-            상단의 텍스트는 [잔여학점 / 전체학점] 을 나타냅니다.
-          </S.CourseHistoryTopTitleSpan>
-        </S.CourseHistoryTopTitle>
-        <S.CourseHistoryTopButton onClick={() => {
-          navigate('/history');
-        }}>
-          자세히 보기
-        </S.CourseHistoryTopButton>
-      </S.CourseHistoryTop>
       <S.CourseHistoryContent>
         {categoryHistory?.map((category) => (
           <CategoryHistory key={category.id} categoryData={category} />

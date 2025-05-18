@@ -1,20 +1,15 @@
 // electron/preload.ts
-import { contextBridge, ipcRenderer } from 'electron';
-
-interface UserData {
-    email: string;
-    name: string;
-    uid: string;
-}
+import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 
 interface ElectronAPI {
     // Store 관련
-    getStoreValue: (key: string) => Promise<any>;
-    setStoreValue: (key: string, value: any) => Promise<void>;
+    getStoreValue: (key: string) => Promise<unknown>;
+    setStoreValue: (key: string, value: unknown) => Promise<void>;
     removeStoreValue: (key: string) => Promise<void>;
 
     // Auth 관련
     logout: () => Promise<void>;
+    on: (channel: string, callback: (code: string) => void) => void;
 
     // 시스템 정보
     versions: {
@@ -33,6 +28,9 @@ const api: ElectronAPI = {
 
     // 로그인 관련
     logout: () => ipcRenderer.invoke('logout'),
+    on: (channel: string, callback: (code: string) => void) => {
+        ipcRenderer.on(channel, (_event: IpcRendererEvent, code: string) => callback(code));
+    },
 
     // 시스템 정보
     versions: {
@@ -45,8 +43,4 @@ const api: ElectronAPI = {
 // API 노출
 contextBridge.exposeInMainWorld('electronAPI', api);
 
-declare global {
-    interface Window {
-        electronAPI: ElectronAPI;
-    }
-}
+// 전역 타입 선언을 별도의 .d.ts 파일로 이동

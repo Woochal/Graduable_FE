@@ -52,6 +52,7 @@ export const AddSemesterContentRight = styled.div`
 export const SemesterFilterContainer = styled.div`
   width: 100%;
   height: 4.688vw;
+  /* height: 52px; */
   /* border: 1px solid blue; */
 `;
 
@@ -73,9 +74,29 @@ export const SemesterFilterYearText = styled.div`
 `;
 
 export const SemesterFilterSemester = styled.div`
-  width: 10.938vw;
+  width: 15.625vw;
   height: 100%;
   margin-right: 0.469vw;
+  /* border: 1px solid red; */
+`;
+
+export const SemesterFilterSemesterSelect = styled.div`
+  width: 12.5vw;
+  height: 100%;
+  justify-content: space-between;
+  /* border: 1px solid red; */
+`;
+
+export const SemesterFilterSemesterOption = styled.div<{isSelected: boolean}>`
+  width: 5.625vw;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+  font-size: ${(props) => props.theme.typography.subtitleb.fontSize};
+  font-weight: ${(props) => props.theme.typography.subtitleb.fontWeight};
+  background-color: ${(props) => props.isSelected ? props.theme.color.primary : props.theme.color.bgCard};
+  border-radius: 0.781vw;
+  cursor: pointer;
   /* border: 1px solid red; */
 `;
 

@@ -2,12 +2,12 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 
-import { app, BrowserWindow, ipcMain } from "electron";
-import serve from "electron-serve";
+import { app, BrowserWindow, ipcMain, protocol } from "electron";
 import path from "node:path";
 import Store from "electron-store";
 import express from "express";
 import axios from "axios";
+import fs from 'fs';
 
 interface WindowConfig {
 	width?: number;
@@ -23,7 +23,8 @@ interface StoreSchema {
 	[key: `userInfo_${string}`]: any; // googleId별 저장
 }
 
-const isProd = process.env.NODE_ENV === "production";
+// 프로덕션 모드 감지 로직 강화
+const isProd = process.env.NODE_ENV === "production" || app.isPackaged;
 const store = new Store<StoreSchema>();
 
 // 개발 환경에서 SSL 인증서 검증 무시
@@ -32,9 +33,8 @@ if (!isProd) {
 	process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
 }
 
-if (isProd) {
-	serve({ directory: "out" });
-} else {
+// userData 경로 설정
+if (!isProd) {
 	app.setPath("userData", `${app.getPath("userData")} (development)`);
 }
 
@@ -193,6 +193,39 @@ const createAuthWindow = async () => {
 	}
 };
 
+// 디렉토리 및 파일 존재 여부 확인 함수
+const isPathValid = (filePath: string): boolean => {
+    try {
+        return fs.existsSync(filePath);
+    } catch (err) {
+        console.error(`Error checking path: ${filePath}`, err);
+        return false;
+    }
+};
+
+// 디렉토리 내용 로그 출력 함수
+const logDirectoryContents = (dirPath: string): void => {
+    try {
+        if (isPathValid(dirPath)) {
+            console.log(`Contents of directory ${dirPath}:`);
+            const items = fs.readdirSync(dirPath);
+            items.forEach(item => {
+                try {
+                    const itemPath = path.join(dirPath, item);
+                    const stats = fs.statSync(itemPath);
+                    console.log(`  ${item} (${stats.isDirectory() ? 'directory' : 'file'})`);
+                } catch (err) {
+                    console.error(`  Error reading ${item}:`, err);
+                }
+            });
+        } else {
+            console.log(`Directory does not exist: ${dirPath}`);
+        }
+    } catch (err) {
+        console.error(`Error reading directory: ${dirPath}`, err);
+    }
+};
+
 // 메인 윈도우 생성
 const createMainWindow = async () => {
 	const windowConfig = store.get("window-config") || {};
@@ -212,25 +245,125 @@ const createMainWindow = async () => {
 		},
 	});
 
+	// 환경 정보 출력
+	console.log("App Path:", app.getAppPath());
+	console.log("Exe Path:", app.getPath("exe"));
+	console.log("Is Packaged:", app.isPackaged);
+	console.log("Current Working Directory:", process.cwd());
+	console.log("Resources Path:", process.resourcesPath);
+	console.log("NODE_ENV:", process.env.NODE_ENV);
+
+	// 로딩 방식 개선
 	if (isProd) {
-		await mainWindow.loadURL("app://./index.html");
+		// 주요 앱 디렉토리 내용 로그
+		logDirectoryContents(app.getAppPath());
+		logDirectoryContents(path.dirname(app.getPath("exe")));
+		if (process.resourcesPath) {
+			logDirectoryContents(process.resourcesPath);
+			logDirectoryContents(path.join(process.resourcesPath, "app"));
+			logDirectoryContents(path.join(process.resourcesPath, "app", "dist"));
+			logDirectoryContents(path.join(process.resourcesPath, "dist"));
+		}
+
+		// 다양한 경로를 시도하여 index.html 파일 찾기
+		const possiblePaths = [
+			// 추가적인 위치들을 전용 함수로 찾아봄
+			...findAllPossibleIndexPaths(),
+			// 기존 경로들
+			path.join(app.getAppPath(), "dist", "index.html"),
+			path.join(process.resourcesPath, "app", "dist", "index.html"),
+			path.join(process.resourcesPath, "dist", "index.html"),
+			path.join(app.getPath("exe"), "../resources/dist/index.html"),
+			path.join(app.getPath("exe"), "../resources/app/dist/index.html"),
+			path.join(process.resourcesPath, "app.asar", "dist", "index.html"),
+			path.join(process.resourcesPath, "app.asar.unpacked", "dist", "index.html"),
+			path.join(process.cwd(), "dist", "index.html"),
+			path.join(process.cwd(), "resources", "app", "dist", "index.html"),
+		];
+
+		let indexPath = '';
+		
+		// 실제로 존재하는 경로 찾기
+		for (const p of possiblePaths) {
+			console.log("Checking path:", p);
+			if (isPathValid(p)) {
+				indexPath = p;
+				console.log("Found index.html at:", indexPath);
+				break;
+			}
+		}
+
+		if (indexPath) {
+			console.log("Loading file from:", indexPath);
+			try {
+				await mainWindow.loadFile(indexPath);
+				console.log("Successfully loaded index.html");
+			} catch (err) {
+				console.error("Error loading file:", err);
+				// 추가 폴백: 로컬 파일 URL로 시도
+				try {
+					const fileUrl = `file://${indexPath}`;
+					console.log("Trying with file URL:", fileUrl);
+					await mainWindow.loadURL(fileUrl);
+					console.log("Successfully loaded with file URL");
+				} catch (urlErr) {
+					console.error("Failed to load with file URL:", urlErr);
+				}
+			}
+		} else {
+			console.error("Could not find index.html in any expected location");
+			
+			// 마지막 수단: extraResources에서 직접 찾기
+			try {
+				// 여러 가능한 extraResources 경로 시도
+				const extraResourcesPaths = [
+					path.join(process.resourcesPath, "app", "dist", "index.html"),
+					path.join(process.resourcesPath, "dist", "index.html"),
+				];
+				
+				let foundExtraPath = false;
+				
+				for (const extraPath of extraResourcesPaths) {
+					console.log("Trying extraResources path:", extraPath);
+					
+					if (isPathValid(extraPath)) {
+						console.log("Found index.html in extraResources:", extraPath);
+						await mainWindow.loadFile(extraPath);
+						foundExtraPath = true;
+						break;
+					}
+				}
+				
+				if (!foundExtraPath) {
+					// 파일 시스템 전체 검색
+					console.log("Searching for index.html recursively...");
+					const searchResult = findIndexHtmlRecursively(process.resourcesPath);
+					
+					if (searchResult) {
+						console.log("Found index.html through recursive search:", searchResult);
+						await mainWindow.loadFile(searchResult);
+					} else {
+						// 최후의 수단: 개발 서버에서 로드 (빌드된 파일 못 찾는 경우)
+						console.error("Failed to find index.html through all methods");
+						displayErrorPage("Could not find index.html file");
+					}
+				}
+			} catch (err) {
+				console.error("Final attempt failed:", err);
+				displayErrorPage(`Error: ${(err as Error).message}`);
+			}
+		}
 	} else {
 		const port = process.argv[2] || 5173;
 		await mainWindow.loadURL(`http://localhost:${port}/`);
-		// mainWindow.webContents.openDevTools();
 	}
 
 	// 창 크기 로그 출력
 	const size = mainWindow.getSize();
 	console.log(`Window size: ${size[0]}x${size[1]}`);
 	
-	// // 창 크기 변경 시 로그 출력
-	// mainWindow.on('resize', () => {
-	// 	const newSize = mainWindow?.getSize();
-	// 	if (newSize) {
-	// 		console.log(`Window resized: ${newSize[0]}x${newSize[1]}`);
-	// 	}
-	// });
+	// 디버깅 도움을 위해 개발자 도구 열기 (배포 버전에서도 문제 진단을 위해)
+	mainWindow.webContents.openDevTools();
 
 	mainWindow.on("close", () => {
 		if (!mainWindow?.isMaximized()) {
@@ -245,6 +378,105 @@ const createMainWindow = async () => {
 		mainWindow = null;
 	});
 };
+
+// 에러 페이지 표시
+function displayErrorPage(errorMessage: string) {
+	if (mainWindow) {
+		mainWindow.webContents.loadURL(`data:text/html,<html><body>
+			<h1>Failed to load application</h1>
+			<p>${errorMessage}</p>
+			<h2>Debug Information</h2>
+			<pre>
+App Path: ${app.getAppPath()}
+Exe Path: ${app.getPath("exe")}
+Is Packaged: ${app.isPackaged}
+Current Working Directory: ${process.cwd()}
+Resources Path: ${process.resourcesPath}
+NODE_ENV: ${process.env.NODE_ENV}
+			</pre>
+		</body></html>`);
+	}
+}
+
+// 모든 가능한 index.html 경로 찾기
+function findAllPossibleIndexPaths(): string[] {
+	const baseLocations = [
+		app.getAppPath(),
+		process.resourcesPath,
+		path.dirname(app.getPath("exe")),
+		process.cwd(),
+		path.join(process.resourcesPath, "app"),
+		path.join(process.resourcesPath, "app.asar"),
+		path.join(process.resourcesPath, "app.asar.unpacked"),
+	];
+	
+	const subPaths = [
+		"dist",
+		"app/dist",
+		"resources/dist",
+		"resources/app/dist",
+	];
+	
+	const result: string[] = [];
+	
+	for (const base of baseLocations) {
+		if (!base) continue;
+		
+		// 기본 경로에 index.html이 있는지 확인
+		result.push(path.join(base, "index.html"));
+		
+		// 하위 경로 조합
+		for (const sub of subPaths) {
+			result.push(path.join(base, sub, "index.html"));
+		}
+	}
+	
+	return result;
+}
+
+// index.html 파일 재귀적 검색
+function findIndexHtmlRecursively(startDir: string, maxDepth = 3): string | null {
+    if (maxDepth <= 0) return null;
+    
+    try {
+        if (!isPathValid(startDir)) return null;
+        
+        const files = fs.readdirSync(startDir);
+        
+        // 현재 디렉토리에서 index.html 찾기
+        const indexHtml = files.find(file => file === 'index.html');
+        if (indexHtml) {
+            return path.join(startDir, indexHtml);
+        }
+        
+        // dist 디렉토리 우선 확인
+        const distDir = files.find(file => file === 'dist' && 
+            fs.statSync(path.join(startDir, file)).isDirectory());
+        
+        if (distDir) {
+            const distPath = path.join(startDir, distDir);
+            const inDist = findIndexHtmlRecursively(distPath, maxDepth - 1);
+            if (inDist) return inDist;
+        }
+        
+        // 다른 하위 디렉토리 확인
+        for (const file of files) {
+            const filePath = path.join(startDir, file);
+            try {
+                if (fs.statSync(filePath).isDirectory() && file !== 'dist') {
+                    const found = findIndexHtmlRecursively(filePath, maxDepth - 1);
+                    if (found) return found;
+                }
+            } catch (err) {
+                console.error(`Error checking directory ${filePath}:`, err);
+            }
+        }
+    } catch (err) {
+        console.error(`Error searching directory ${startDir}:`, err);
+    }
+    
+    return null;
+}
 
 // IPC 핸들러들
 ipcMain.handle("get-store-value", (_, key: string) => {
@@ -268,6 +500,35 @@ ipcMain.handle("logout", () => {
 	store.delete("user");
 	store.delete("userInfo");
 });
+
+// 콘솔 로그를 렌더러 프로세스로 보내는 함수
+const sendLogToRenderer = (message: string) => {
+	if (mainWindow && !mainWindow.isDestroyed()) {
+		mainWindow.webContents.send("main-process-log", message);
+	}
+};
+
+// 콘솔 로그 재정의
+const originalConsoleLog = console.log;
+const originalConsoleError = console.error;
+
+console.log = (...args: any[]) => {
+	const message = args.map(arg => 
+		typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+	).join(' ');
+	
+	originalConsoleLog.apply(console, args);
+	sendLogToRenderer(`[LOG] ${message}`);
+};
+
+console.error = (...args: any[]) => {
+	const message = args.map(arg => 
+		typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+	).join(' ');
+	
+	originalConsoleError.apply(console, args);
+	sendLogToRenderer(`[ERROR] ${message}`);
+};
 
 // 앱 이벤트 핸들러
 app.on("ready", createMainWindow);

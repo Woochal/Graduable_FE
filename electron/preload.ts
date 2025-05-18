@@ -1,5 +1,7 @@
 // electron/preload.ts
 import { contextBridge, ipcRenderer } from "electron";
+import process from 'node:process';
+import path from 'node:path';
 
 interface ElectronAPI {
 	// Store 관련
@@ -18,6 +20,12 @@ interface ElectronAPI {
 		node: () => string;
 		chrome: () => string;
 		electron: () => string;
+	};
+	
+	// 디버깅 정보
+	debug: {
+		getProcessInfo: () => Record<string, any>;
+		onMainProcessLog: (callback: (message: string) => void) => void;
 	};
 }
 
@@ -54,7 +62,37 @@ contextBridge.exposeInMainWorld("electronAPI", {
 		chrome: () => process.versions.chrome,
 		electron: () => process.versions.electron,
 	},
+	
+	// 디버깅 정보
+	debug: {
+		getProcessInfo: () => ({
+			platform: process.platform,
+			arch: process.arch,
+			versions: process.versions,
+			env: {
+				NODE_ENV: process.env.NODE_ENV,
+				isPackaged: process.env.NODE_ENV === 'production',
+			},
+			paths: {
+				cwd: process.cwd(),
+				execPath: process.execPath,
+				resourcesPath: process.resourcesPath,
+			}
+		}),
+		onMainProcessLog: (callback: (message: string) => void) => {
+			ipcRenderer.on("main-process-log", (_, message) => callback(message));
+		}
+	}
 } as ElectronAPI);
+
+// 초기 디버깅 정보 출력
+console.log("Preload script executed");
+console.log("Node version:", process.versions.node);
+console.log("Chrome version:", process.versions.chrome);
+console.log("Electron version:", process.versions.electron);
+console.log("Current working directory:", process.cwd());
+console.log("Process path:", process.execPath);
+console.log("Resources path:", process.resourcesPath);
 
 declare global {
 	interface Window {

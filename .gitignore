@@ -26,4 +26,12 @@ dist-ssr
 # TypeScript build info
 *.tsbuildinfo
 
+# Electron build files
+release/
+*.dmg
+*.blockmap
+builder-*.yml
+latest-*.yml
+entitlements.mac.plist
+
 

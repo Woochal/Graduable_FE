@@ -1,6 +1,6 @@
 export interface SemesterFilterType {
     year: number;
-    semester: string;
+    semester: number;
 } 
 
 // 추가하고 싶은 과목 선택할 때 필요한 데이터

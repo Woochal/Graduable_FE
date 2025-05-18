@@ -26,11 +26,14 @@ const RemainingCredit = () => {
             {remainingCreditData.totalCredit - remainingCreditData.attendedCredit}학점
           </S.RemainingCreditText>
           <S.RemainingCreditDetail>
-            {remainingCreditData.totalCredit} 학점 중 {remainingCreditData.attendedCredit} 학점을 수강했어요
+            {remainingCreditData.totalCredit} 학점 중 {remainingCreditData.attendedCredit} 학점을 수강했어요.
           </S.RemainingCreditDetail>
         </S.RemainingCreditContentLeft>
         <S.RemainingCreditContentRight>
           <CreditDonut {...remainingCreditData} />
+          <S.RemainingCreditDetailPercent>
+            졸업까지 {((remainingCreditData.totalCredit - remainingCreditData.attendedCredit) / remainingCreditData.totalCredit * 100).toFixed(0)}% 남았어요.
+          </S.RemainingCreditDetailPercent>
         </S.RemainingCreditContentRight>
       </S.RemainingCreditContent>
     </S.RemainingCreditContainer>

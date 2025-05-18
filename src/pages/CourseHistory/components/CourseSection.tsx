@@ -1,3 +1,4 @@
+// CourseSection.tsx 수정
 import type React from "react";
 import styled from "styled-components";
 import type { section } from "../../../types/sugangcheck/sugangcheck";
@@ -15,14 +16,15 @@ import {
 } from "./styled";
 import { useRecoilState } from "recoil";
 import { selectionsAtom } from "../../../store/atom";
+
 interface CourseSectionProps {
 	sectionList: section[];
 	selectedSection: string | null;
 	loading: boolean;
 	onSectionClick: (sectionName: string) => void;
-
 	sectionProgress: SectionProgressData[];
 }
+
 interface SectionProgressData {
 	section: string;
 	completedCredits: number;
@@ -30,10 +32,36 @@ interface SectionProgressData {
 	remainingCredits: number;
 	progressPercentage: number;
 }
+
 interface VerticalProgressBarProps {
 	progress: number;
 	color: string;
 }
+
+// 섹션 이름 매핑 함수
+const getDisplaySectionName = (sectionName: string): string => {
+	// 교양 관련 분류
+	if (
+		[
+			"자유선택(교양)",
+			"전문교양",
+			"실무영어",
+			"신앙및세계관",
+			"인성및리더십",
+			"BSM",
+			"ICT융합기초",
+		].includes(sectionName)
+	) {
+		return sectionName; // 원래 이름 유지 (섹션 표시에서는 원래 이름 사용)
+	}
+	// 전공 관련 분류
+	if (["전공주제(AI컴퓨터심화)", "BSM"].includes(sectionName)) {
+		return sectionName; // 원래 이름 유지 (섹션 표시에서는 원래 이름 사용)
+	}
+	// 그 외의 경우 원래 분류명 반환
+	return sectionName;
+};
+
 const VerticalProgressBar = ({ progress, color }: VerticalProgressBarProps) => {
 	const clampedProgress = Math.min(Math.max(progress, 0), 100);
 
@@ -56,17 +84,18 @@ const Explan = styled.div`
   color: ${(props) => props.theme.color.textSub};
   margin-left: 1.7vw;
 `;
+
 export default function CourseSection({
 	sectionList,
 	selectedSection,
 	loading,
 	onSectionClick,
-	//courseList,
 	sectionProgress,
 }: CourseSectionProps) {
 	const [selectedSections, setSelectedSections] = useRecoilState<string | null>(
 		selectionsAtom,
 	);
+
 	// 색상 결정 함수
 	const getProgressColor = (progress: number) => {
 		if (progress >= 100) return theme.color.primary; // 완료
@@ -140,7 +169,8 @@ export default function CourseSection({
 									<SectionName
 										$isSelected={selectedSection === sectionItem.section}
 									>
-										{sectionItem.section}
+										{/* 화면에 표시할 때는 간결한 이름으로 변환 */}
+										{getDisplaySectionName(sectionItem.section)}
 									</SectionName>
 								</div>
 							);

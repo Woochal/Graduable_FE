@@ -1,6 +1,7 @@
 // components/InitialSetup/YearSemesterSelection.tsx
 import React, { useState } from "react";
 import styled from "styled-components";
+import Dropdown from "../Dropdown"; // 경로는 실제 프로젝트 구조에 맞게 조정하세요
 
 const Container = styled.div`
   width: 100%;
@@ -11,29 +12,26 @@ const Container = styled.div`
 `;
 
 const Box = styled.div`
-display: flex;
-flex-direction: column;
-border-radius: 15px;
-width: 57.2297vw;
-height: 34.1258vw;
-background: ${(props) => props.theme.color.bgCard};
-  `;
+  display: flex;
+  flex-direction: column;
+  border-radius: 15px;
+  width: 57.2297vw;
+  height: 34.1258vw;
+  background: ${(props) => props.theme.color.bgCard};
+`;
 
 const Title = styled.div`
-margin-top: 2rem;
-margin-left: 2rem;
-
+  margin-top: 2rem;
+  margin-left: 2rem;
   color: #fff;
   font-size: 2rem;
   font-weight: ${(props) => props.theme.typography.title.fontWeight};
-
-
 `;
 
 const Subtitle = styled.div`
-margin-top: 2rem;
-margin-left: 2rem;
-color: #fff;
+  margin-top: 2rem;
+  margin-left: 2rem;
+  color: #fff;
   font-size: ${(props) => props.theme.typography.title.fontSize};
   font-weight: ${(props) => props.theme.typography.title.fontWeight};
 `;
@@ -46,7 +44,7 @@ const SelectionGroup = styled.div`
 `;
 
 const SelectionItem = styled.div`
-    display: flex;
+  display: flex;
   text-align: center;
 `;
 
@@ -54,31 +52,14 @@ const Label = styled.div`
   color: #fff;
   font-size: ${(props) => props.theme.typography.title.fontSize};
   font-weight: ${(props) => props.theme.typography.title.fontWeight};
-    margin-left: 1rem;
-    margin-top: 1rem;
-  
-`;
-
-const Dropdown = styled.select`
-  padding: 0.75rem 1.5rem;
-  background-color: #2B2C38;
-  color: #fff;
-  border: 1px solid #3A3B47;
-  border-radius: 8px;
-  font-size: 1rem;
-  cursor: pointer;
-  min-width: 150px;
-  
-  &:focus {
-    outline: none;
-    border-color: #5DA3FF;
-  }
+  margin-left: 1rem;
+  margin-top: 1rem;
 `;
 
 const SemesterButtons = styled.div`
   display: flex;
   gap: 1rem;
-    margin-left: 4rem;
+  margin-left: 4rem;
   justify-content: center;
 `;
 
@@ -98,15 +79,14 @@ const SemesterButton = styled.button<{ $selected: boolean }>`
 `;
 
 const NavigationButtons = styled.div`
-margin-left: 34vw;
+  margin-left: 34vw;
   display: flex;
   gap: 1rem;
   margin-top: 4rem;
 `;
 
 const Button = styled.button<{ $primary?: boolean; $disabled?: boolean }>`
-
-    padding: 0.75rem 2.5rem;
+  padding: 0.75rem 2.5rem;
   background-color: ${(props) => {
 		if (props.$disabled) return "#22222E";
 		return props.$primary ? "#9BDAC9" : "#22222E";
@@ -161,6 +141,11 @@ export default function YearSemesterSelection({
 		return selectedYear !== null && selectedSemester !== null;
 	};
 
+	// 드롭다운에 전달할 핸들러
+	const handleYearSelect = (year: number) => {
+		setSelectedYear(year);
+	};
+
 	return (
 		<Container>
 			<Box>
@@ -168,17 +153,15 @@ export default function YearSemesterSelection({
 				<Subtitle>해당하는 년도-학기를 선택해주세요.</Subtitle>
 				<SelectionGroup>
 					<SelectionItem>
+						{/* 기존 Dropdown 대신 새로운 Dropdown 컴포넌트 사용 */}
 						<Dropdown
-							value={selectedYear || ""}
-							onChange={(e) => setSelectedYear(Number.parseInt(e.target.value))}
-						>
-							<option value="">선택</option>
-							{years.map((year) => (
-								<option key={year} value={year}>
-									{year}
-								</option>
-							))}
-						</Dropdown>
+							data={years}
+							selectedData={selectedYear}
+							setSelectedData={handleYearSelect}
+							placeholder="선택"
+							width="150px"
+							height="40px"
+						/>
 						<Label>년</Label>
 
 						<SemesterButtons>

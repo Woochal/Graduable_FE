@@ -19,7 +19,6 @@
         "axios": "^1.6.0",
         "chart.js": "^4.4.9",
         "dotenv": "^16.5.0",
-        "electron-google-oauth2": "^3.1.0",
         "electron-serve": "^2.1.1",
         "electron-squirrel-startup": "^1.0.1",
         "electron-store": "^10.0.1",

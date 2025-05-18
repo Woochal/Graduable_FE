@@ -1,15 +1,11 @@
 // electron/main.ts
 import * as dotenv from 'dotenv';
-import { app, BrowserWindow, ipcMain, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, protocol } from 'electron';
 import serve from 'electron-serve';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import Store from 'electron-store';
-import axios from 'axios';
 import fs from 'node:fs';
-import { OAuth2Client } from 'google-auth-library';
-import express from 'express';
-import type { Server } from 'node:http';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -25,32 +21,41 @@ const log = (message: string, data?: unknown) => {
 
 // 환경 변수 로드 설정
 if (app.isPackaged) {
-    // In production, try multiple possible locations for .env
     const possiblePaths = [
         join(process.resourcesPath, '.env'),
         join(__dirname, '.env'),
         join(__dirname, '../.env'),
         join(__dirname, '../../.env'),
+        join(app.getAppPath(), '.env'),
     ];
 
     log('Searching for .env file in:', possiblePaths);
 
+    let envLoaded = false;
     for (const path of possiblePaths) {
         if (fs.existsSync(path)) {
             log('Found .env file at:', path);
             dotenv.config({ path });
+            envLoaded = true;
             break;
         }
     }
+
+    if (!envLoaded) {
+        log('No .env file found, using default environment variables');
+        // 기본 환경 변수 설정
+        process.env.NODE_ENV = 'production';
+    }
 } else {
-    // In development, use the .env file in the project root
     dotenv.config();
 }
 
 // 환경 변수 로드 확인
-log('Environment variables loaded:', {
-    clientId: process.env.VITE_GOOGLE_CLIENT_ID ? 'Set' : 'Not set',
-    clientSecret: process.env.VITE_GOOGLE_CLIENT_SECRET ? 'Set' : 'Not set',
+log('Environment variables:', {
+    NODE_ENV: process.env.NODE_ENV,
+    VITE_KAKAO_JAVASCRIPT_KEY: process.env.VITE_KAKAO_JAVASCRIPT_KEY ? 'Set' : 'Not set',
+    VITE_KAKAO_REST_API_KEY: process.env.VITE_KAKAO_REST_API_KEY ? 'Set' : 'Not set',
+    VITE_API_URL: process.env.VITE_API_URL,
 });
 
 interface WindowConfig {
@@ -68,8 +73,9 @@ interface StoreSchema {
 }
 
 const store = new Store<StoreSchema>();
+store.clear(); // 스토어 초기화
+log('Store cleared');
 
-// 개발 환경에서 SSL 인증서 검증 무시
 if (!app.isPackaged) {
     app.commandLine.appendSwitch('ignore-certificate-errors');
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -81,19 +87,68 @@ if (app.isPackaged) {
     app.setPath('userData', `${app.getPath('userData')} (development)`);
 }
 
-// 고정된 OAuth 콜백 포트 설정
-const OAUTH_CALLBACK_PORT = 42813;
-
 let mainWindow: BrowserWindow | null = null;
-let authWindow: BrowserWindow | null = null;
-let server: Server | null = null;
 
-// Register custom protocol on app ready
 app.whenReady().then(() => {
-    app.setAsDefaultProtocolClient('graduable');
+    // 프로토콜 핸들러 등록
+    protocol.registerFileProtocol('file', (request, callback) => {
+        const url = request.url;
+        log('File protocol request received:', url);
+
+        // auth 리디렉션 처리
+        if (url.includes('/auth')) {
+            log('Auth redirect detected:', url);
+            if (mainWindow) {
+                // URL에서 code 파라미터 추출
+                const code = new URL(url).searchParams.get('code');
+                if (code) {
+                    log('Auth code received:', code);
+                    // 메인 페이지로 리디렉션하면서 code 전달
+                    mainWindow.loadFile(join(__dirname, '../index.html'), {
+                        query: { code },
+                    });
+                } else {
+                    mainWindow.loadFile(join(__dirname, '../index.html'));
+                }
+            } else {
+                log('Main window not found');
+            }
+            return;
+        }
+
+        callback({ path: url });
+    });
+
+    // HTTP 프로토콜 핸들러 등록
+    protocol.registerHttpProtocol('http', (request, callback) => {
+        const url = request.url;
+        log('HTTP protocol request received:', url);
+
+        // auth 리디렉션 처리
+        if (url.includes('/auth')) {
+            log('Auth redirect detected:', url);
+            if (mainWindow) {
+                // URL에서 code 파라미터 추출
+                const code = new URL(url).searchParams.get('code');
+                if (code) {
+                    log('Auth code received:', code);
+                    // 메인 페이지로 리디렉션하면서 code 전달
+                    mainWindow.loadFile(join(__dirname, '../index.html'), {
+                        query: { code },
+                    });
+                } else {
+                    mainWindow.loadFile(join(__dirname, '../index.html'));
+                }
+            } else {
+                log('Main window not found');
+            }
+            return;
+        }
+
+        callback({ url });
+    });
 });
 
-// 메인 윈도우 생성
 const createMainWindow = async () => {
     const windowConfig = store.get('window-config') || {};
 
@@ -108,20 +163,36 @@ const createMainWindow = async () => {
             nodeIntegration: false,
             contextIsolation: true,
             preload: join(__dirname, 'preload.js'),
+            webSecurity: false, // 개발 중에만 false로 설정
         },
     });
 
-    // Chrome user agent 설정
     mainWindow.webContents.setUserAgent(
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36'
     );
 
+    // 개발자 도구 자동 열기
+    mainWindow.webContents.openDevTools();
+
+    // 페이지 로드 이벤트 리스너
+    mainWindow.webContents.on('did-finish-load', () => {
+        log('Page loaded successfully');
+    });
+
+    mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+        log('Page load failed:', { errorCode, errorDescription });
+    });
+
     if (app.isPackaged) {
-        await mainWindow.loadFile(join(__dirname, '../index.html'));
+        log('Loading production build');
+        await mainWindow.loadFile(join(__dirname, '../index.html'), {
+            hash: '/',
+        });
     } else {
         const port = process.argv[2] || 5173;
-        await mainWindow.loadURL(`http://localhost:${port}/`);
-        mainWindow.webContents.openDevTools();
+        const url = `http://localhost:${port}/`;
+        log('Loading development build:', url);
+        await mainWindow.loadURL(url);
     }
 
     mainWindow.on('close', () => {
@@ -158,228 +229,13 @@ ipcMain.handle('logout', () => {
     log('User logged out');
 });
 
-// Google OAuth 내장 창 핸들러 (추가)
-ipcMain.handle('open-google-auth-window', () => {
-    createAuthWindow();
-    return Promise.resolve();
-});
-
-// Google OAuth: 외부 브라우저 열기 (기존 방식)
-ipcMain.handle('open-google-auth', async () => {
-    try {
-        const clientId = process.env.VITE_GOOGLE_CLIENT_ID;
-        const redirectUri = 'http://localhost:42813/callback';
-        const scope = encodeURIComponent('openid email profile');
-        const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(
-            redirectUri
-        )}&response_type=code&scope=${scope}&access_type=offline`;
-
-        // 기본 브라우저에서 열기
-        await shell.openExternal(authUrl);
-        log('Google OAuth URL opened in default browser:', authUrl);
-    } catch (error) {
-        log('Error opening Google OAuth URL:', error);
-        mainWindow?.webContents.send('oauth-error', '브라우저를 열 수 없습니다.');
-    }
-});
-
-// Google OAuth 내장 창 생성 (추가)
-const createAuthWindow = async () => {
-    try {
-        // 이미 열려있는 인증 창이 있으면 닫기
-        if (authWindow && !authWindow.isDestroyed()) {
-            authWindow.close();
-        }
-
-        authWindow = new BrowserWindow({
-            width: 600,
-            height: 700,
-            webPreferences: {
-                nodeIntegration: false,
-                contextIsolation: true,
-            },
-            parent: mainWindow || undefined,
-            modal: true,
-        });
-
-        const clientId = process.env.VITE_GOOGLE_CLIENT_ID;
-
-        if (!clientId) {
-            log('Google Client ID가 설정되지 않았습니다!');
-            mainWindow?.webContents.send('oauth-error', 'Client ID가 설정되지 않았습니다.');
-            return;
-        }
-
-        // 리디렉션 URI 설정
-        const redirectUri = `http://localhost:${OAUTH_CALLBACK_PORT}/callback`;
-        const scope = encodeURIComponent('openid email profile');
-
-        const authUrl =
-            `https://accounts.google.com/o/oauth2/v2/auth?` +
-            `client_id=${clientId}&` +
-            `redirect_uri=${encodeURIComponent(redirectUri)}&` +
-            `response_type=code&` +
-            `scope=${scope}&` +
-            `access_type=offline&` +
-            `prompt=consent`;
-
-        log('Loading Google OAuth URL in internal window:', authUrl);
-        authWindow.loadURL(authUrl);
-
-        authWindow.on('closed', () => {
-            authWindow = null;
-        });
-    } catch (error) {
-        log('OAuth 창 생성 실패:', error);
-    }
-};
-
-// Start local server for OAuth callback
-function startLocalServer() {
-    if (server) {
-        try {
-            server.close();
-            log('Closed existing OAuth callback server');
-        } catch (error) {
-            log('Error closing existing server:', error);
-        }
-        server = null;
-    }
-
-    const expressApp = express();
-    const port = OAUTH_CALLBACK_PORT;
-
-    expressApp.get('/callback', async (req, res) => {
-        log('Received OAuth callback:', req.query);
-        const code = req.query.code as string;
-        const error = req.query.error as string;
-
-        if (error) {
-            log('OAuth error from callback:', error);
-            mainWindow?.webContents.send('oauth-error', error);
-            res.send(`
-                <html>
-                    <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
-                        <h1 style="color: #f44336;">인증 실패</h1>
-                        <p>오류: ${error}</p>
-                        <p>이 창을 닫고 다시 시도해주세요.</p>
-                        <script>setTimeout(() => { window.close(); }, 3000);</script>
-                    </body>
-                </html>
-            `);
-            return;
-        }
-
-        if (code) {
-            try {
-                const clientId = process.env.VITE_GOOGLE_CLIENT_ID;
-                const clientSecret = process.env.VITE_GOOGLE_CLIENT_SECRET;
-                const redirectUri = `http://localhost:${port}/callback`;
-
-                if (!clientId || !clientSecret) {
-                    throw new Error('OAuth 환경 변수가 설정되지 않았습니다');
-                }
-
-                const oauth2Client = new OAuth2Client(clientId, clientSecret, redirectUri);
-
-                log('Exchanging code for tokens...');
-                const { tokens } = await oauth2Client.getToken(code);
-
-                log('Getting user info...');
-                const userResponse = await axios.get('https://www.googleapis.com/oauth2/v2/userinfo', {
-                    headers: { Authorization: `Bearer ${tokens.access_token}` },
-                });
-
-                log('OAuth successful, user info:', userResponse.data);
-                mainWindow?.webContents.send('oauth-success', {
-                    googleId: userResponse.data.id,
-                    email: userResponse.data.email,
-                    name: userResponse.data.name,
-                });
-
-                res.send(`
-                    <html>
-                        <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
-                            <h1 style="color: #4CAF50;">로그인 성공!</h1>
-                            <p>이 창을 닫으셔도 됩니다.</p>
-                            <script>setTimeout(() => { window.close(); }, 1500);</script>
-                        </body>
-                    </html>
-                `);
-            } catch (error) {
-                log('OAuth error:', error);
-                mainWindow?.webContents.send('oauth-error', '인증 실패');
-                res.send(`
-                    <html>
-                        <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
-                            <h1 style="color: #f44336;">로그인 실패</h1>
-                            <p>이 창을 닫고 다시 시도해주세요.</p>
-                            <script>setTimeout(() => { window.close(); }, 3000);</script>
-                        </body>
-                    </html>
-                `);
-            }
-        } else {
-            log('No code received in callback');
-            res.send(`
-                <html>
-                    <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
-                        <h1 style="color: #f44336;">오류 발생</h1>
-                        <p>인증 코드를 받지 못했습니다.</p>
-                        <script>setTimeout(() => { window.close(); }, 3000);</script>
-                    </body>
-                </html>
-            `);
-        }
-
-        // 인증 창 닫기
-        if (authWindow && !authWindow.isDestroyed()) {
-            setTimeout(() => {
-                authWindow?.close();
-                authWindow = null;
-            }, 2000);
-        }
-    });
-
-    server = expressApp.listen(port, () => {
-        log(`OAuth callback server running at http://localhost:${port}`);
-    });
-}
-
-// Windows: handle protocol on second-instance
-const gotTheLock = app.requestSingleInstanceLock();
-if (!gotTheLock) {
-    app.quit();
-} else {
-    app.on('second-instance', (event, argv) => {
-        // Windows: protocol URL is in argv
-        const urlArg = argv.find((arg) => arg.startsWith('graduable://'));
-        if (urlArg) {
-            app.emit('open-url', event, urlArg);
-        }
-
-        // 창이 열려 있으면 포커스
-        if (mainWindow) {
-            if (mainWindow.isMinimized()) mainWindow.restore();
-            mainWindow.focus();
-        }
-    });
-}
-
 // 앱 이벤트 핸들러
 app.on('ready', async () => {
-    // 앱 시작 시 로컬 서버 시작
-    startLocalServer();
-
-    // 메인 윈도우 생성
+    log('App is ready');
     createMainWindow();
 });
 
 app.on('window-all-closed', () => {
-    if (server) {
-        server.close();
-        server = null;
-    }
     if (process.platform !== 'darwin') {
         app.quit();
     }
@@ -388,13 +244,5 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
     if (mainWindow === null) {
         createMainWindow();
-    }
-});
-
-// 앱 종료 시 정리
-app.on('quit', () => {
-    if (server) {
-        server.close();
-        server = null;
     }
 });

@@ -2,7 +2,6 @@
     "name": "swproject",
     "version": "0.1.0",
     "private": true,
-    "type": "module",
     "main": "dist/electron/main.js",
     "homepage": "./",
     "scripts": {
@@ -12,8 +11,10 @@
         "build-electron": "rimraf dist/electron && tsc -p electron/tsconfig.json",
         "start": "vite preview",
         "lint": "eslint . --ext .ts,.tsx",
-        "package": "npm run build && npm run build-electron && electron-forge package",
-        "make": "npm run build && npm run build-electron && electron-forge make"
+        "package": "npm run build && npm run build-electron && electron-builder --dir",
+        "make": "npm run build && npm run build-electron && electron-builder",
+        "dist": "npm run build && npm run build-electron && electron-builder --mac",
+        "afterSign": "scripts/notarize.js"
     },
     "dependencies": {
         "axios": "^1.6.0",
@@ -21,7 +22,7 @@
         "dotenv": "^16.5.0",
         "electron-serve": "^2.1.1",
         "electron-squirrel-startup": "^1.0.1",
-        "electron-store": "^10.0.1",
+        "electron-store": "^8.2.0",
         "express": "^4.18.0",
         "framer-motion": "^12.9.4",
         "react": "^18",
@@ -33,15 +34,6 @@
         "styled-components": "^6.1.17"
     },
     "devDependencies": {
-        "@electron-forge/cli": "^7.8.1",
-        "@electron-forge/maker-deb": "^7.8.1",
-        "@electron-forge/maker-rpm": "^7.8.1",
-        "@electron-forge/maker-squirrel": "^7.8.1",
-        "@electron-forge/maker-zip": "^7.8.1",
-        "@electron-forge/plugin-auto-unpack-natives": "^7.8.1",
-        "@electron-forge/plugin-fuses": "^7.8.1",
-        "@electron-forge/plugin-webpack": "^7.8.1",
-        "@electron/fuses": "^1.8.0",
         "@eslint/eslintrc": "^3",
         "@tailwindcss/postcss": "^4",
         "@types/express": "^4.17.21",
@@ -55,6 +47,7 @@
         "concurrently": "^9.1.2",
         "electron": "^34.1.4",
         "electron-builder": "^26.0.12",
+        "electron-notarize": "^1.2.2",
         "eslint": "^9.21.0",
         "eslint-plugin-react-hooks": "^5.1.0",
         "eslint-plugin-react-refresh": "^0.4.19",
@@ -71,14 +64,19 @@
         "webpack": "^5.99.8"
     },
     "build": {
-        "appId": "com.swproject.app",
-        "productName": "SWProject",
+        "appId": "com.se.graduable",
+        "productName": "Graduable",
+        "asar": true,
         "mac": {
-            "category": "public.app-category.productivity",
+            "hardenedRuntime": true,
+            "gatekeeperAssess": false,
             "target": [
-                "dmg",
-                "zip"
-            ]
+                "dmg"
+            ],
+            "category": "public.app-category.education",
+            "entitlements": "build/entitlements.mac.plist",
+            "entitlementsInherit": "build/entitlements.mac.plist",
+            "identity": "Minhyeok Kim (GXC72G385T)"
         },
         "files": [
             "dist/**/*",
@@ -100,49 +98,12 @@
                     "graduable"
                 ]
             }
-        ]
+        ],
+        "dmg": {
+            "sign": true
+        },
+        "afterSign": "scripts/notarize.js"
     },
-    "config": {
-        "forge": {
-            "packagerConfig": {
-                "asar": true,
-                "extraResource": [
-                    "dist"
-                ],
-                "ignore": [
-                    "node_modules/.bin",
-                    "node_modules/.cache",
-                    "node_modules/.vite"
-                ]
-            },
-            "makers": [
-                {
-                    "name": "@electron-forge/maker-squirrel",
-                    "config": {
-                        "name": "swproject"
-                    }
-                },
-                {
-                    "name": "@electron-forge/maker-zip",
-                    "platforms": [
-                        "darwin"
-                    ]
-                },
-                {
-                    "name": "@electron-forge/maker-deb",
-                    "config": {}
-                },
-                {
-                    "name": "@electron-forge/maker-rpm",
-                    "config": {}
-                }
-            ],
-            "plugins": [
-                {
-                    "name": "@electron-forge/plugin-auto-unpack-natives",
-                    "config": {}
-                }
-            ]
-        }
-    }
+    "description": "Graduable Application",
+    "author": "Minhyeok Kim"
 }

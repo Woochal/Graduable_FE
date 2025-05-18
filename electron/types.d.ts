@@ -1,21 +1,25 @@
-interface OAuthUserData {
-    googleId: string;
+interface UserData {
     email: string;
     name: string;
+    uid: string;
 }
 
 interface ElectronAPI {
     getStoreValue: (key: string) => Promise<unknown>;
     setStoreValue: (key: string, value: unknown) => Promise<void>;
     removeStoreValue: (key: string) => Promise<void>;
-    openGoogleAuth: () => Promise<void>;
     logout: () => Promise<void>;
-    onOAuthSuccess: (callback: (data: OAuthUserData) => void) => void;
-    onOAuthError: (callback: (error: string) => void) => void;
+    versions: {
+        node: () => string;
+        chrome: () => string;
+        electron: () => string;
+    };
 }
 
 declare global {
     interface Window {
-        electron: ElectronAPI;
+        electronAPI: ElectronAPI;
     }
 }
+
+export {};

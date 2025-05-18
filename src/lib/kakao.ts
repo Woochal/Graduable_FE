@@ -8,8 +8,8 @@ const isDev = () => {
 export const KAKAO_CONFIG = {
     JAVASCRIPT_KEY: import.meta.env.VITE_KAKAO_JAVASCRIPT_KEY,
     REST_API_KEY: import.meta.env.VITE_KAKAO_REST_API_KEY,
-    REDIRECT_URI: isDev() ? 'http://localhost:5173/auth' : 'file:///auth',
-    SCOPE: 'profile_nickname,account_email', // 필요한 정보: 닉네임, 이메일
+    REDIRECT_URI: isDev() ? 'http://localhost:5173/auth' : 'http://localhost/auth',
+    SCOPE: 'profile_nickname,account_email',
 };
 
 // 카카오 SDK 타입 정의

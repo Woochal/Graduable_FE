@@ -159,15 +159,8 @@ export default function GoogleLogin() {
             console.log('Processed user data:', userData);
             await handleUserLogin(userData);
         } catch (error) {
-            // 현재 로그인 상태 확인
-            const currentUser = isElectron()
-                ? await window.electronAPI.getStoreValue('user')
-                : localStorage.getItem('user');
-
-            // 실제로 로그인이 실패한 경우에만 에러 메시지 표시
-            if (!currentUser) {
-                alert('로그인에 실패했습니다. 다시 시도해주세요.');
-            }
+            // 에러 발생 시 조용히 처리
+            console.error('Login process error:', error);
         }
     };
 

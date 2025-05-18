@@ -61,7 +61,7 @@ export default function GoogleLogin() {
                 const authCode = await window.electronAPI.getStoreValue('auth_code');
                 console.log('Checking auth code in store:', authCode);
 
-                if (authCode) {
+                if (authCode && typeof authCode === 'string') {
                     console.log('Found auth code in store, starting callback handling');
                     await handleKakaoCallback(authCode);
                     // 사용 후 삭제
@@ -85,6 +85,7 @@ export default function GoogleLogin() {
         // IPC 이벤트 리스너 등록
         if (isElectron()) {
             console.log('Registering IPC event listener for auth-code');
+            // @ts-ignore - electronAPI.on is defined in preload.ts
             window.electronAPI.on('auth-code', async (code: string) => {
                 console.log('Received auth code via IPC:', code);
                 await handleKakaoCallback(code);
@@ -158,19 +159,12 @@ export default function GoogleLogin() {
             console.log('Processed user data:', userData);
             await handleUserLogin(userData);
         } catch (error) {
-            console.error('Kakao login failed:', error);
-            if (axios.isAxiosError(error)) {
-                console.error('Kakao API error:', {
-                    status: error.response?.status,
-                    data: error.response?.data,
-                    message: error.message,
-                });
-            }
-            // 이미 로그인된 상태라면 경고창을 표시하지 않음
+            // 현재 로그인 상태 확인
             const currentUser = isElectron()
                 ? await window.electronAPI.getStoreValue('user')
                 : localStorage.getItem('user');
 
+            // 실제로 로그인이 실패한 경우에만 에러 메시지 표시
             if (!currentUser) {
                 alert('로그인에 실패했습니다. 다시 시도해주세요.');
             }

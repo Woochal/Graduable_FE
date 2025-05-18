@@ -2,14 +2,14 @@ import type { SugangCheck, section } from "src/types/sugangcheck/sugangcheck";
 
 // Mock data for sections
 export const sectionData: section[] = [
-	{ section: "신앙 및 세계관", sectiontotal: 9 },
+	{ section: "신앙및세계관", sectiontotal: 9 },
 	{ section: "인성및리더십", sectiontotal: 6 },
 	{ section: "실무영어", sectiontotal: 9 },
 	{ section: "전문교양", sectiontotal: 5 },
 	{ section: "BSM", sectiontotal: 18 },
 	{ section: "ICT융합기초", sectiontotal: 2 },
-	{ section: "자유선택", sectiontotal: 9 },
-	{ section: "전공주제", sectiontotal: 60 },
+	{ section: "자유선택(교양)", sectiontotal: 9 },
+	{ section: "전공주제(AI컴퓨터심화)", sectiontotal: 60 },
 ];
 
 export const sectionDetailData: SugangCheck[] = [

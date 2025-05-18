@@ -73,14 +73,20 @@ const StepTitle = styled.div`
 
 const StepDescription = styled.p`
   color: #888;
+  margin-left: 2.5rem;
   font-size: ${(props) => props.theme.typography.subTitle.fontSize};
   font-weight: ${(props) => props.theme.typography.subTitle.fontWeight};
 
 `;
 
 const ActionButtons = styled.div`
+  color: #888;
+background:${(props) => props.theme.color.bgDefault};
+padding: 0.5rem 1rem;
+border-radius: 8px;
   display: flex;
   gap: 1rem;
+  margin-left: 2.5rem;
   margin-top: 0.5rem;
 `;
 
@@ -198,7 +204,7 @@ export default function GraduationInfo({
 
 		setLoading(true);
 
-		// 서버 통신 없이 그냥 텍스트만 전달
+		// 텍스트만 그대로 전달
 		onComplete?.(graduationText);
 	};
 
@@ -226,14 +232,7 @@ export default function GraduationInfo({
 							</StepTitle>
 						</StepCOntent>
 						<ActionButtons>
-							<StepButton
-								onClick={() =>
-									window.open("https://hisnet.handong.edu", "_blank")
-								}
-							>
-								히즈넷 바로가기
-							</StepButton>
-							<StepButton>내 졸업 심사 정보로 이동하기</StepButton>
+							학사정보 → 졸업 → 졸업심사결과조회 → 졸업심사결과보기
 						</ActionButtons>
 					</StepItem>
 

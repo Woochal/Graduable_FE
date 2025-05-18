@@ -145,6 +145,7 @@ export default function MenuBar() {
 		semester: 1,
 	});
 
+	// 기존 useEffect 부분을 다음과 같이 수정
 	useEffect(() => {
 		const loadUserInfo = async () => {
 			try {
@@ -165,24 +166,31 @@ export default function MenuBar() {
 				setUser(userData);
 
 				// 서버에서 최신 정보 가져오기 (googleId로만)
-				const serverUrl = import.meta.env.VITE_API_URL;
+				const serverUrl = import.meta.env.VITE_SERVER_URL;
 				if (serverUrl && userData?.googleId) {
 					try {
 						const response = await axios.get(
 							`${serverUrl}/user/info/${userData.googleId}`,
 						);
+						console.log("API 응답:", response.data);
 
 						if (response.data) {
+							// API 응답 형식에 맞게 데이터 매핑
 							setUserInfo({
-								studentName: response.data.name || "이름 없음",
-								semester: response.data.currentSemester || 1,
+								studentName: response.data.userName || "이름 없음", // userName 필드 사용
+								semester: response.data.userSemester || 1, // userSemester 필드 사용
 							});
-							setSemster(response.data.currentSemester || 1);
+							setSemster(response.data.userSemester || 1); // userSemester 필드 사용
 
-							// 서버 데이터로 로컬 업데이트
+							// 서버 데이터로 로컬 업데이트 (API 응답 형식에 맞게 조정)
 							const updatedUserInfo = {
 								...userData,
-								...response.data,
+								name: response.data.userName, // 기존 코드와의 호환성 위해 name으로도 저장
+								userNickname: response.data.userNickname,
+								currentSemester: response.data.userSemester, // 기존 코드와의 호환성 위해 currentSemester로도 저장
+								userSemester: response.data.userSemester,
+								email: response.data.email,
+								googleId: response.data.googleId,
 							};
 
 							if (isElectron()) {
@@ -201,21 +209,33 @@ export default function MenuBar() {
 						console.error("서버에서 정보 가져오기 실패:", error);
 						// 로컬 데이터 사용
 						if (userInfoData) {
+							// 로컬 데이터도 새로운 필드명으로 확인
+							const semester =
+								userInfoData.userSemester || userInfoData.currentSemester || 1;
+							const name =
+								userInfoData.userName || userInfoData.name || "이름 없음";
+
 							setUserInfo({
-								studentName: userData?.name || "이름 없음",
-								semester: userInfoData.currentSemester || 1,
+								studentName: name,
+								semester: semester,
 							});
-							setSemster(userInfoData.currentSemester || 1);
+							setSemster(semester);
 						}
 					}
 				} else {
 					// 서버 없거나 실패 시 로컬 데이터 사용
 					if (userInfoData) {
+						// 로컬 데이터도 새로운 필드명으로 확인
+						const semester =
+							userInfoData.userSemester || userInfoData.currentSemester || 1;
+						const name =
+							userInfoData.userName || userInfoData.name || "이름 없음";
+
 						setUserInfo({
-							studentName: userData?.name || "이름 없음",
-							semester: userInfoData.currentSemester || 1,
+							studentName: name,
+							semester: semester,
 						});
-						setSemster(userInfoData.currentSemester || 1);
+						setSemster(semester);
 					}
 				}
 			} catch (error) {
@@ -225,7 +245,6 @@ export default function MenuBar() {
 
 		loadUserInfo();
 	}, [setSemster]);
-
 	const handleSemesterUpdate = async (newSemester: number) => {
 		try {
 			// 로컬 데이터 업데이트
@@ -239,7 +258,8 @@ export default function MenuBar() {
 
 			const updatedUserInfo = {
 				...currentUserInfo,
-				currentSemester: newSemester,
+				currentSemester: newSemester, // 기존 호환성을 위해 유지
+				userSemester: newSemester, // 새로운 API 스펙에 맞게 추가
 			};
 
 			// 로컬 저장
@@ -257,16 +277,13 @@ export default function MenuBar() {
 				);
 			}
 
-			// 서버 업데이트 (googleId로만)
-			const serverUrl = import.meta.env.VITE_API_URL;
+			// 서버 업데이트 (API 스펙에 맞게 수정)
+			const serverUrl = import.meta.env.VITE_SERVER_URL;
 			if (serverUrl && user?.googleId) {
 				try {
 					await axios.put(
-						`${serverUrl}/user/update-semester`,
-						{
-							googleId: user.googleId,
-							currentSemester: newSemester,
-						},
+						`${serverUrl}/user/info/${user.googleId}?semester=${newSemester}`,
+						{},
 						{
 							headers: {
 								"Content-Type": "application/json",
@@ -287,7 +304,6 @@ export default function MenuBar() {
 			console.error("학기 정보 업데이트 실패:", error);
 		}
 	};
-
 	// 3. MyPage.tsx 수정 - 로그아웃
 	const handleLogout = async () => {
 		try {
@@ -315,7 +331,7 @@ export default function MenuBar() {
 
 		if (user?.googleId) {
 			// 서버에서 삭제 시도
-			const serverUrl = import.meta.env.VITE_API_URL;
+			const serverUrl = import.meta.env.VITE_SERVER_URL;
 			if (serverUrl) {
 				try {
 					await axios.delete(`${serverUrl}/user/delete/${user.googleId}`);

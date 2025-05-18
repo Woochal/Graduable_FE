@@ -1,12 +1,15 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import * as S from "./styled";
 import MenuItem from "./MenuItem";
 import type { MenuItemType } from "../../../../types";
 import logo from "../../../../assets/Logo.png";
+import axios from "axios";
+import { get } from "http";
 const Bar = () => {
 	const navigate = useNavigate();
 	const location = useLocation();
+	const [name, setName] = React.useState<string>("");
 
 	const menuItems: MenuItemType[] = [
 		{ name: "대시보드", path: "/" },
@@ -17,6 +20,13 @@ const Bar = () => {
 		{ name: "이수체계도", path: "/curriculum" },
 		{ name: "마이페이지", path: "/mypage" },
 	];
+	useEffect(() => {
+		const getUsername = async () => {
+			const response = await axios.get("/api/courseList");
+			setName(response.data.userName);
+		};
+		getUsername();
+	}, []);
 
 	return (
 		<S.BarContainer>
@@ -35,7 +45,7 @@ const Bar = () => {
 				<S.Logo>
 					<S.LogoImage src={logo} alt="logo" />
 				</S.Logo>
-				<S.UserName>김하람</S.UserName>
+				<S.UserName>{name}</S.UserName>
 			</S.UserInfo>
 		</S.BarContainer>
 	);

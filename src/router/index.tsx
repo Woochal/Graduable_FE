@@ -14,6 +14,7 @@ import GoogleLogin from '../../src/pages/GoogleLogin/index';
 import InitialSetupFlow from '../../src/components/common/Initialsetup/Initialsetupflow';
 import { UserInfo } from '../types/login/login-inform';
 import { BrowserRouter as Router, Route, Routes, Navigate, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 // Electron 환경 확인
 const isElectron = () => {
@@ -46,10 +47,10 @@ const AuthAndSetupCheck = ({ children }: { children: React.ReactNode }) => {
                 isLoggedIn = !!user;
             }
 
-            console.log('로그인 상태:', { isLoggedIn, user }); // 디버깅용
+            console.log('로그인 상태:', { isLoggedIn, user });
 
             if (!isLoggedIn) {
-                console.log('로그인이 필요합니다.'); // 디버깅용
+                console.log('로그인이 필요합니다.');
                 setNeedsAuth(true);
                 setNeedsSetup(false);
                 setIsLoading(false);
@@ -65,15 +66,44 @@ const AuthAndSetupCheck = ({ children }: { children: React.ReactNode }) => {
                 userInfo = stored ? JSON.parse(stored) : null;
             }
 
-            console.log('사용자 정보:', userInfo); // 디버깅용
+            console.log('사용자 정보:', userInfo);
 
             // 필수 정보 확인
             if (!userInfo || !userInfo.currentSemester || !userInfo.currentSemesterInfo) {
-                console.log('초기 설정이 필요합니다.'); // 디버깅용
-                setNeedsSetup(true);
-                setNeedsAuth(false);
+                // 서버에서 사용자 정보 확인
+                if (user?.googleId) {
+                    try {
+                        const serverUrl = import.meta.env.VITE_SERVER_URL;
+                        if (serverUrl) {
+                            const response = await axios.get(`${serverUrl}/user/info/${user.googleId}`);
+                            if (response.data) {
+                                userInfo = response.data;
+                                // 서버 데이터를 로컬에 저장
+                                if (isElectron()) {
+                                    await window.electronAPI.setStoreValue('userInfo', userInfo);
+                                    await window.electronAPI.setStoreValue(`userInfo_${user.googleId}`, userInfo);
+                                } else {
+                                    localStorage.setItem('userInfo', JSON.stringify(userInfo));
+                                    localStorage.setItem(`userInfo_${user.googleId}`, JSON.stringify(userInfo));
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        console.error('서버에서 사용자 정보 조회 실패:', error);
+                    }
+                }
+
+                if (!userInfo || !userInfo.currentSemester || !userInfo.currentSemesterInfo) {
+                    console.log('초기 설정이 필요합니다.');
+                    setNeedsSetup(true);
+                    setNeedsAuth(false);
+                } else {
+                    console.log('서버에서 사용자 정보를 가져왔습니다.');
+                    setNeedsSetup(false);
+                    setNeedsAuth(false);
+                }
             } else {
-                console.log('모든 설정이 완료되었습니다.'); // 디버깅용
+                console.log('모든 설정이 완료되었습니다.');
                 setNeedsSetup(false);
                 setNeedsAuth(false);
             }
@@ -97,12 +127,12 @@ const AuthAndSetupCheck = ({ children }: { children: React.ReactNode }) => {
     }
 
     if (needsAuth) {
-        console.log('로그인 페이지로 이동합니다.'); // 디버깅용
+        console.log('로그인 페이지로 이동합니다.');
         return <Navigate to="/login" replace />;
     }
 
     if (needsSetup) {
-        console.log('초기 설정 페이지로 이동합니다.'); // 디버깅용
+        console.log('초기 설정 페이지로 이동합니다.');
         return <InitialSetupFlow onComplete={handleSetupComplete} />;
     }
 

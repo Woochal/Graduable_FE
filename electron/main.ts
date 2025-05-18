@@ -50,7 +50,7 @@ log('Environment variables:', {
     NODE_ENV: process.env.NODE_ENV,
     VITE_KAKAO_JAVASCRIPT_KEY: process.env.VITE_KAKAO_JAVASCRIPT_KEY ? 'Set' : 'Not set',
     VITE_KAKAO_REST_API_KEY: process.env.VITE_KAKAO_REST_API_KEY ? 'Set' : 'Not set',
-    VITE_API_URL: process.env.VITE_API_URL,
+    VITE_SERVER_URL: process.env.VITE_SERVER_URL,
 });
 
 interface WindowConfig {

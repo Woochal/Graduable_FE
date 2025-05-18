@@ -5,7 +5,7 @@ import SemesterFilter from './SemesterFilter';
 import CourseSearch from './CourseSearch';
 import CourseList from './CourseList';
 import SelectedCourseList from './SelectedCourseList';
-import { CourseDataAllType } from '../../../../types/simulator/simulator';
+import { CourseDataAllType, SemesterFilterType } from '../../../../types/simulator/simulator';
 
 const AddSemester = () => {
 
@@ -33,7 +33,7 @@ const AddSemester = () => {
       professor: '남재창',
       gradeType: true,
       isEnglish: true,
-      year: 2025,
+      year: 2024,
       semester: 1,
     },
     {
@@ -46,8 +46,8 @@ const AddSemester = () => {
       professor: '홍참길',
       gradeType: true,
       isEnglish: true,
-      year: 2025,
-      semester: 1,
+      year: 2024,
+      semester: 2,
     },
     {
       id: '4',
@@ -59,7 +59,7 @@ const AddSemester = () => {
       professor: '남재창',
       gradeType: true,
       isEnglish: true,
-      year: 2025,
+      year: 2023,
       semester: 1,
     },
     {
@@ -172,6 +172,13 @@ const AddSemester = () => {
   const [courseList, setCourseList] = useState<CourseDataAllType[]>([]);
   const [selectedCourseList, setSelectedCourseList] = useState<CourseDataAllType[]>([]);
 
+
+  const [selectedFilter, setSelectedFilter] = useState<SemesterFilterType>({
+    year: 0,
+    semester: 0,
+  });
+
+
   const handleAddCourse = (course: CourseDataAllType) => {
     // 중복 방지
     if (selectedCourseList.some((c) => c.id === course.id)) {
@@ -189,13 +196,16 @@ const AddSemester = () => {
       setCourseList([]);
     } else {
 
+      const filteredCourseList: CourseDataAllType[] = [];
+      filteredCourseList.push(...dummyCourseList.filter(course => course.year === selectedFilter.year && course.semester === selectedFilter.semester));
+
       // 대소문자 구별 안하기 위해 모두 소문자 변환
       const searchLower = searchText.toLowerCase();
       
       const prefixMatches: CourseDataAllType[] = [];
       const containsMatches: CourseDataAllType[] = [];
       
-      dummyCourseList.forEach(course => {
+      filteredCourseList.forEach(course => {
         const nameLower = course.name.toLowerCase();
         
         // 검색어로 시작하는지 확인
@@ -225,7 +235,7 @@ const AddSemester = () => {
 
   return (
     <S.AddSemesterContainer>
-      <SemesterFilter />
+      <SemesterFilter selectedFilter={selectedFilter} setSelectedFilter={setSelectedFilter} />
       <S.AddSemesterContent>
         <S.AddSemesterContentLeft>
           <CourseSearch searchText={searchText} setSearchText={setSearchText} />

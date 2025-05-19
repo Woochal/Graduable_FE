@@ -17,6 +17,7 @@
         "afterSign": "scripts/notarize.js"
     },
     "dependencies": {
+        "@tanstack/react-query": "^5.76.1",
         "axios": "^1.6.0",
         "chart.js": "^4.4.9",
         "dotenv": "^16.5.0",

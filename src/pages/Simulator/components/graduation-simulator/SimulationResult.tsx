@@ -22,7 +22,7 @@ const SimulationResult = () => {
   } } = useQuery<RoadmapDataType>({
     queryKey: ['simulationResultData', selectedSemester],
     queryFn: () => getFilteredSimulationResultAPI(userData.googleId, selectedSemester),
-    enabled: userData.uid !== null && selectedSemester.length > 0,
+    enabled: userData.googleId !== null && selectedSemester.length > 0,
   });
 
   // const simulationResultData: RoadmapDataType = {

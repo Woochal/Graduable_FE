@@ -88,7 +88,7 @@ const DashboardPage = () => {
 	  } } = useQuery<RoadmapDataType>({
 		queryKey: ['simulationResultData', semesterList],
 		queryFn: () => getFilteredSimulationResultAPI(userData.googleId, semesterList),
-		enabled: userData.uid !== null,
+		enabled: userData.googleId !== null,
 	  });
 	
 	return (

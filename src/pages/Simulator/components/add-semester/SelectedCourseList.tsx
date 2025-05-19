@@ -4,12 +4,22 @@ import { useNavigate } from 'react-router-dom';
 import { CourseDataAllType } from '../../../../types/simulator/simulator';
 import deleteIcon from '../../../../assets/delete.png';
 import Modal from './Modal';
+import { saveSemesterRoadmapAPI } from '../../../../axios/SimulatorApi';
+import { useRecoilValue } from 'recoil';
+import { userDataRecoil } from '../../../../atom/UserAtom';
+
 
 const SelectedCourseList = ({ selectedCourseList, handleDeleteCourse }: { selectedCourseList: CourseDataAllType[], handleDeleteCourse: (course: CourseDataAllType) => void }) => {
 
   const [showSemesterModal, setShowSemesterModal] = useState(false);
-  const handleSemesterUpdate = (semester: number) => {
+  const userData = useRecoilValue(userDataRecoil);
+  const handleSemesterUpdate = async (semester: number) =>  {
     // TODO: 로드맵에 추가
+    try {
+      const response = await saveSemesterRoadmapAPI(userData.googleId, semester, selectedCourseList);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (

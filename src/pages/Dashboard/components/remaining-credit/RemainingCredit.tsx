@@ -3,12 +3,7 @@ import * as S from '../styled';
 import { RemainingCreditType } from '../../../../types';
 import CreditDonut from './CreditDonut';
 
-const RemainingCredit = () => {
-
-  const remainingCreditData: RemainingCreditType = {
-		totalCredit: 130,
-		attendedCredit: 100,
-	};
+const RemainingCredit = ({ simulationResultData }: { simulationResultData: RemainingCreditType }) => {
 
   return (
     <S.RemainingCreditContainer>
@@ -23,16 +18,16 @@ const RemainingCredit = () => {
       <S.RemainingCreditContent>
         <S.RemainingCreditContentLeft>
           <S.RemainingCreditText>
-            {remainingCreditData.totalCredit - remainingCreditData.attendedCredit}학점
+            {simulationResultData.totalCredit - simulationResultData.attendedCredit}학점
           </S.RemainingCreditText>
           <S.RemainingCreditDetail>
-            {remainingCreditData.totalCredit} 학점 중 {remainingCreditData.attendedCredit} 학점을 수강했어요.
+            {simulationResultData.totalCredit} 학점 중 {simulationResultData.attendedCredit} 학점을 수강했어요.
           </S.RemainingCreditDetail>
         </S.RemainingCreditContentLeft>
         <S.RemainingCreditContentRight>
-          <CreditDonut {...remainingCreditData} />
+          <CreditDonut {...simulationResultData} />
           <S.RemainingCreditDetailPercent>
-            졸업까지 {((remainingCreditData.totalCredit - remainingCreditData.attendedCredit) / remainingCreditData.totalCredit * 100).toFixed(0)}% 남았어요.
+            졸업까지 {simulationResultData.leftCreditPercent}% 남았어요.
           </S.RemainingCreditDetailPercent>
         </S.RemainingCreditContentRight>
       </S.RemainingCreditContent>

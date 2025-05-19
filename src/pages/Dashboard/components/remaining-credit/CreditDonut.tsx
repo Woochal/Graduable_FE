@@ -25,7 +25,7 @@ const CreditDonut = ( creditData: RemainingCreditType ) => {
 
   const theme = useTheme();
 
-  const { totalCredit, attendedCredit } = creditData;
+  const { totalCredit, attendedCredit, leftCreditPercent, attendedCreditPercent } = creditData;
 
 
   const options: ChartOptions<'doughnut'> = {
@@ -65,7 +65,7 @@ const CreditDonut = ( creditData: RemainingCreditType ) => {
       </S.CreditDonut>
       <S.CreditDonutText>
         <Spacer size={10} axis="horizontal" />
-        {Math.round((attendedCredit/totalCredit) * 100)}%
+        {attendedCreditPercent}%
       </S.CreditDonutText>
     </S.CreditDonutContainer>
   );

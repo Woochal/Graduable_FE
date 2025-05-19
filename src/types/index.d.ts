@@ -20,6 +20,8 @@ export interface CategoryHistoryType {
 export interface RemainingCreditType {
     totalCredit: number;
     attendedCredit: number;
+    attendedCreditPercent: number;
+    leftCreditPercent: number;
 }
 
 export interface CourseDataType {

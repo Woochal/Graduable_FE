@@ -65,7 +65,7 @@ const CreditDonut = ( creditData: RemainingCreditType ) => {
       </S.CreditDonut>
       <S.CreditDonutText>
         <Spacer size={10} axis="horizontal" />
-        {Math.round((attendedCredit/totalCredit) * 100)}%
+        {attendedCredit === 0 ? 0 : Math.round((attendedCredit/totalCredit) * 100)}%
       </S.CreditDonutText>
     </S.CreditDonutContainer>
   );

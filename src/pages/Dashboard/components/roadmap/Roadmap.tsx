@@ -3,59 +3,72 @@ import * as S from '../styled';
 import RoadmapCourse from './RoadmapCourse';
 import { CourseDataType, RoadmapSemesterData } from '../../../../types';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { getCurrentSemesterRoadmapAPI } from '../../../../axios/DashboardApi';
+import { userDataRecoil } from '../../../../atom/UserAtom';
+import { useRecoilValue } from 'recoil';
 
 const Roadmap = () => {
   const navigate = useNavigate();
+  const userData = useRecoilValue(userDataRecoil);
 
-  const roadmapCourseData : CourseDataType[] = [
-    {
-      name: '모바일 앱 개발',
-      credit: 3,
-      major: true,
-    },
-    {
-      name: '문제해결 스튜디오',
-      credit: 2,
-      major: true,
-    },
-    {
-      name: '이공계 글쓰기',
-      credit: 3,
-      major: false,
-    },
-    {
-      name: '컴퓨터 네트워크',
-      credit: 3,
-      major: true,
-    },
-    {
-      name: '한국사(근현대사)',
-      credit: 3,
-      major: false,
-    },
-    {
-      name: '캡스톤디자인1',
-      credit: 2,
-      major: true,
-    },
-    {
-      name: '스크롤도 가능하다',
-      credit: 3,
-      major: true,
-    },
-    {
-      name: '캬캬캬캬캬',
-      credit: 2,
-      major: true,
-    },
-  ];
+  const { data: roadmapSemesterData } = useQuery<RoadmapSemesterData>({
+    queryKey: ['roadmap'],
+    queryFn: () => getCurrentSemesterRoadmapAPI(userData.uid),
+  });
 
-  const roadmapSemesterData : RoadmapSemesterData = {
-    year: 2024,
-    semester: 2,
-    semesterN: 12,
-    courses: roadmapCourseData,
-  };
+  const roadmapCourseData = roadmapSemesterData?.courses || [];
+  const totalCredit = roadmapCourseData.reduce((acc: number, course: CourseDataType) => acc + course.credit, 0);
+
+  // const roadmapCourseData : CourseDataType[] = [
+  //   {
+  //     name: '모바일 앱 개발',
+  //     credit: 3,
+  //     major: true,
+  //   },
+  //   {
+  //     name: '문제해결 스튜디오',
+  //     credit: 2,
+  //     major: true,
+  //   },
+  //   {
+  //     name: '이공계 글쓰기',
+  //     credit: 3,
+  //     major: false,
+  //   },
+  //   {
+  //     name: '컴퓨터 네트워크',
+  //     credit: 3,
+  //     major: true,
+  //   },
+  //   {
+  //     name: '한국사(근현대사)',
+  //     credit: 3,
+  //     major: false,
+  //   },
+  //   {
+  //     name: '캡스톤디자인1',
+  //     credit: 2,
+  //     major: true,
+  //   },
+  //   {
+  //     name: '스크롤도 가능하다',
+  //     credit: 3,
+  //     major: true,
+  //   },
+  //   {
+  //     name: '캬캬캬캬캬',
+  //     credit: 2,
+  //     major: true,
+  //   },
+  // ];
+
+  // const roadmapSemesterData : RoadmapSemesterData = {
+  //   year: 2024,
+  //   semester: 2,
+  //   semesterN: 12,
+  //   courses: roadmapCourseData,
+  // };
 
   return (
     <S.RoadmapContainer>
@@ -87,13 +100,13 @@ const Roadmap = () => {
           </S.CourseTypeInformation>
 
           <S.CourseCreditInformation>
-              {roadmapCourseData.reduce((acc, course) => acc + course.credit, 0)}학점
+              {totalCredit}학점
           </S.CourseCreditInformation>
 
         </S.CourseInformation>
 
         <S.RoadmapSemester>
-          {roadmapSemesterData.semesterN}학기 ({roadmapSemesterData.year}년 {roadmapSemesterData.semester}학기)
+          {roadmapSemesterData?.semesterN}학기 ({roadmapSemesterData?.year}년 {roadmapSemesterData?.semester}학기)
         </S.RoadmapSemester>
 
       </S.RoadmapContent>

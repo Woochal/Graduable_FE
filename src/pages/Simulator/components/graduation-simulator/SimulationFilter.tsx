@@ -1,92 +1,56 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import * as S from '../styled';
 import { Semester } from '../../../../types/simulator/simulator';
-const SimulationFilter = () => {
-  
-  const semesterListDummy: Semester[] = [
-    {
-      year: 2020,
-      semester: 1,
-      semesterN: 1,
-    },
-    {
-      year: 2020,
-      semester: 2,
-      semesterN: 2,
-    },
-    {
-      year: 2021,
-      semester: 1,
-      semesterN: 3,
-    },
-    {
-      year: 2021,
-      semester: 2,
-      semesterN: 4,
-    },
-    {
-      year: 2022,
-      semester: 1,
-      semesterN: 5,
-    },
-    {
-      year: 2022,
-      semester: 2,
-      semesterN: 6,
-    },
-    {
-      year: 2023,
-      semester: 1,
-      semesterN: 7,
-    },
-    {
-      year: 2023,
-      semester: 2,
-      semesterN: 8,
-    },
-    {
-      year: 2024,
-      semester: 1,
-      semesterN: 9,
-    },
-    {
-      year: 2024,
-      semester: 2,
-      semesterN: 10,
-    },
-    {
-      year: 2025,
-      semester: 1,
-      semesterN: 11,
-    },
-    {
-      year: 2025,
-      semester: 2,
-      semesterN: 12,
-    },
-    
-  ];
+import { userDataRecoil } from '../../../../atom/UserAtom';
+import { useRecoilValue, useRecoilState } from 'recoil';
+import { selectedSemesterRecoil } from '../../../../atom/SimulationAtom';
+import { useQueryClient } from '@tanstack/react-query';
 
-  const [selectedSemester, setSelectedSemester] = useState<Semester[]>([]);
+const SimulationFilter = () => {
+
+  const userData = useRecoilValue(userDataRecoil);
+  const [semesterList, setSemesterList] = useState<Semester[]>([]);
+
+  useEffect(() => {
+    const newSemesterList: Semester[] = [];
+    for(let i = 1; i <= userData.userSemester; i++) {
+      newSemesterList.push({
+        year: userData.yearOfSemester - Math.floor((userData.userSemester - i )/ 2),
+        semester: (i + 1) % 2 + 1,
+        semesterN: i,
+      });
+    }
+    setSemesterList(newSemesterList);
+  }, [userData.userSemester, userData.yearOfSemester]);
+
+  // const queryClient = useQueryClient();
+
+  
+
+  const [selectedSemester, setSelectedSemester] = useRecoilState<number[]>(selectedSemesterRecoil);
 
   const isSemesterEqual = (s1: Semester, s2: Semester) => {
     return s1.year === s2.year && s1.semester === s2.semester;
   };
 
-  const handleSemesterClick = (semester: Semester) => {
+  const handleSemesterClick = (semester: number) => {
 
-    const isAlreadySelected = selectedSemester.some(s => isSemesterEqual(s, semester));
+    const isAlreadySelected = selectedSemester.some(s => s === semester);
     
     if(isAlreadySelected) {
       // 선택 해제
-      setSelectedSemester(selectedSemester.filter(s => !isSemesterEqual(s, semester)));
+      setSelectedSemester(selectedSemester.filter(s => s !== semester));
     } else {
       // 선택 추가
       setSelectedSemester([...selectedSemester, semester]);
     }
 
-    // TODO: roadmapData 업데이트
   };
+
+  // useEffect(() => {
+  //   console.log(selectedSemester);
+  //   queryClient.invalidateQueries({ queryKey: ['simulationResultData'] });
+  // }, [selectedSemester]);
 
   return (
     <S.SimulationFilterContainer>
@@ -98,8 +62,8 @@ const SimulationFilter = () => {
           졸업심사에 추가하고 싶은 로드맵을 선택해주세요.
         </S.SimulationFilterContentTitle>
         <S.SimulationFilterRoadmapList>
-          {semesterListDummy.map((semester, index) => (
-            <S.SimulationFilterRoadmapItem key={index} isSelected={selectedSemester.some(s => isSemesterEqual(s, semester))} onClick={() => handleSemesterClick(semester)}>
+          {semesterList.map((semester, index) => (
+            <S.SimulationFilterRoadmapItem key={index} isSelected={selectedSemester.some(s => s === index + 1)} onClick={() => handleSemesterClick(index + 1)}>
               {index + 1}학기({semester.year.toString().slice(2,4)}-{semester.semester})
             </S.SimulationFilterRoadmapItem>
           ))}

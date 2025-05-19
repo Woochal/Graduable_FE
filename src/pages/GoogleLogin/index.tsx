@@ -1,228 +1,291 @@
 // src/pages/GoogleLogin.tsx
-import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import styled from "styled-components";
-import Graduate from "../../assets/Logo.png";
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios';
+import styled from 'styled-components';
+import Graduate from '../../assets/Logo.png';
+import { KAKAO_CONFIG, initKakao } from '../../lib/kakao';
+
 const LoginContainer = styled.div`
-width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  background: ${(props) => props.theme.color.bgDefault};
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: ${(props) => props.theme.color.bgDefault};
 `;
 
 const Title = styled.h1`
-  color: white;
-  font-size: 3rem;
-  margin-top: 3rem;
-  font-weight: bold;
+    color: white;
+    font-size: 3rem;
+    margin-top: 3rem;
+    font-weight: bold;
 `;
 
 const Subtitle = styled.button`
-border-radius: 8px;
-border: none;
-width: 371.58px;
-    height:65px;
-background: ${(props) => props.theme.color.bgCard};
-  color: #9E9EA4;
-  font-size: 1.2rem;
-  margin-top: 3rem;
+    border-radius: 8px;
+    border: none;
+    width: 371.58px;
+    height: 65px;
+    background: ${(props) => props.theme.color.bgCard};
+    color: #9e9ea4;
+    font-size: 1.2rem;
+    margin-top: 3rem;
 `;
 
 const GraduateLogo = styled.img`
-width: 200.2px;
-height: 139.24px;
-
+    width: 200.2px;
+    height: 139.24px;
 `;
 
 const isElectron = () => {
-	return window.electronAPI !== undefined;
+    return window.electronAPI !== undefined;
 };
 
 export default function GoogleLogin() {
-	const navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate();
+    const location = useLocation();
 
-	useEffect(() => {
-		const checkAuth = async () => {
-			let isLoggedIn;
+    useEffect(() => {
+        const checkAuth = async () => {
+            let isLoggedIn;
 
-			if (isElectron()) {
-				const user = await window.electronAPI.getStoreValue("user");
-				isLoggedIn = !!user;
-			} else {
-				isLoggedIn = !!localStorage.getItem("user");
-			}
+            if (isElectron()) {
+                const user = await window.electronAPI.getStoreValue('user');
+                console.log('Checking auth in Electron, user:', user);
+                isLoggedIn = !!user;
 
-			if (isLoggedIn) {
-				navigate("/");
-			}
-		};
+                // store에서 인증 코드 확인
+                const authCode = await window.electronAPI.getStoreValue('auth_code');
+                console.log('Checking auth code in store:', authCode);
 
-		checkAuth();
+                if (authCode && typeof authCode === 'string') {
+                    console.log('Found auth code in store, starting callback handling');
+                    await handleKakaoCallback(authCode);
+                    // 사용 후 삭제
+                    await window.electronAPI.removeStoreValue('auth_code');
+                }
+            } else {
+                const user = localStorage.getItem('user');
+                console.log('Checking auth in Web, user:', user);
+                isLoggedIn = !!user;
+            }
 
-		// Electron에서 OAuth 결과 수신 대기
-		if (isElectron()) {
-			window.electronAPI.onOAuthSuccess(async (userData) => {
-				await handleUserLogin(userData);
-			});
+            if (isLoggedIn) {
+                console.log('User is logged in, navigating to main page');
+                navigate('/');
+            }
+        };
 
-			window.electronAPI.onOAuthError((error) => {
-				console.error("OAuth error:", error);
-				alert("로그인에 실패했습니다.");
-			});
+        checkAuth();
+        initKakao();
 
-			return () => {
-				window.electronAPI.removeAuthListeners();
-			};
-		}
-	}, [navigate]);
+        // IPC 이벤트 리스너 등록
+        if (isElectron()) {
+            console.log('Registering IPC event listener for auth-code');
+            // @ts-ignore - electronAPI.on is defined in preload.ts
+            window.electronAPI.on('auth-code', async (code: string) => {
+                console.log('Received auth code via IPC:', code);
+                await handleKakaoCallback(code);
+            });
+        } else {
+            // URL에서 인증 코드 확인 (웹 환경)
+            const code = new URLSearchParams(location.search).get('code');
+            console.log('Location search:', location.search);
+            console.log('Extracted code from URL:', code);
 
-	// 1. GoogleLogin.tsx - 서버 체크 추가 (선택적)
-	const handleUserLogin = async (userData: any) => {
-		try {
-			console.log("구글 로그인 성공:", userData);
+            if (code) {
+                console.log('Auth code found in URL, starting callback handling');
+                handleKakaoCallback(code);
+            }
+        }
 
-			const basicUserInfo = {
-				googleId: userData.googleId,
-				email: userData.email,
-				name: userData.name,
-			};
+        // 컴포넌트 언마운트 시 이벤트 리스너 제거
+        return () => {
+            if (isElectron()) {
+                // @ts-expect-error - electronAPI 타입 정의에 removeListener가 없어서 추가
+                window.electronAPI.removeListener?.('auth-code');
+            }
+        };
+    }, [navigate, location]);
 
-			// 1. 로컬에 기본 정보 저장
-			await saveLocalUser(basicUserInfo);
+    const handleKakaoCallback = async (code: string) => {
+        try {
+            console.log('Starting Kakao callback handling with code:', code);
 
-			// 2. 먼저 로컬에서 확인
-			let existingUserInfo;
-			if (isElectron()) {
-				existingUserInfo = await window.electronAPI.getStoreValue(
-					`userInfo_${basicUserInfo.googleId}`,
-				);
-			} else {
-				const stored = localStorage.getItem(
-					`userInfo_${basicUserInfo.googleId}`,
-				);
-				existingUserInfo = stored ? JSON.parse(stored) : null;
-			}
+            // 토큰 요청
+            console.log('Requesting access token from Kakao...');
+            const tokenResponse = await axios.post(
+                'https://kauth.kakao.com/oauth/token',
+                new URLSearchParams({
+                    grant_type: 'authorization_code',
+                    client_id: KAKAO_CONFIG.REST_API_KEY,
+                    redirect_uri: KAKAO_CONFIG.REDIRECT_URI,
+                    code: code,
+                }),
+                {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
+                    },
+                }
+            );
 
-			// 3. 로컬에 없고 서버가 있으면 서버에서 확인
-			if (!existingUserInfo) {
-				const serverUrl = import.meta.env.VITE_API_URL;
-				if (serverUrl) {
-					// 서버가 있을 때만
-					try {
-						const response = await axios.get(
-							`${serverUrl}/user/info/${basicUserInfo.googleId}`,
-						);
+            console.log('Token response received:', tokenResponse.data);
+            const accessToken = tokenResponse.data.access_token;
 
-						if (response.data && response.data.currentSemester) {
-							existingUserInfo = response.data;
+            // 사용자 정보 요청
+            console.log('Requesting user info from Kakao...');
+            const userInfoResponse = await axios.get('https://kapi.kakao.com/v2/user/me', {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
 
-							// 서버에서 가져온 데이터를 로컬에 저장
-							if (isElectron()) {
-								await window.electronAPI.setStoreValue(
-									`userInfo_${basicUserInfo.googleId}`,
-									existingUserInfo,
-								);
-							} else {
-								localStorage.setItem(
-									`userInfo_${basicUserInfo.googleId}`,
-									JSON.stringify(existingUserInfo),
-								);
-							}
-						}
-					} catch (error) {
-						console.log("서버에서 사용자 정보 조회 실패 - 신규 사용자로 처리");
-					}
-				}
-			}
+            console.log('User info received:', userInfoResponse.data);
+            const userInfo = userInfoResponse.data;
 
-			// 4. 최종 처리
-			if (existingUserInfo) {
-				// 기존 사용자
-				if (isElectron()) {
-					await window.electronAPI.setStoreValue("userInfo", existingUserInfo);
-				} else {
-					localStorage.setItem("userInfo", JSON.stringify(existingUserInfo));
-				}
-			}
-			// 없으면 초기 설정으로 진행
+            if (!userInfo.id || !userInfo.kakao_account?.email || !userInfo.properties?.nickname) {
+                throw new Error('Required user information is missing');
+            }
 
-			navigate("/");
-		} catch (error) {
-			console.error("로그인 처리 실패:", error);
-			alert("로그인에 실패했습니다.");
-		}
-	};
+            const userData = {
+                googleId: userInfo.id.toString(),
+                email: userInfo.kakao_account.email,
+                name: userInfo.properties.nickname,
+            };
 
-	const saveLocalUser = async (userInfo: any) => {
-		if (isElectron()) {
-			await window.electronAPI.setStoreValue("user", userInfo);
+            console.log('Processed user data:', userData);
+            await handleUserLogin(userData);
+        } catch (error) {
+            // 에러 발생 시 조용히 처리
+            console.error('Login process error:', error);
+        }
+    };
 
-			// googleId로 이전 설정 확인 (이미 가입했던 사용자인지)
-			const savedUserInfo = await window.electronAPI.getStoreValue(
-				`userInfo_${userInfo.googleId}`,
-			);
-			if (savedUserInfo) {
-				await window.electronAPI.setStoreValue("userInfo", savedUserInfo);
-			}
-		} else {
-			localStorage.setItem("user", JSON.stringify(userInfo));
+    const handleUserLogin = async (userData: { googleId: string; email: string; name: string }) => {
+        try {
+            console.log('Starting user login process:', userData);
 
-			// googleId로 이전 설정 확인
-			const savedUserInfo = localStorage.getItem(
-				`userInfo_${userInfo.googleId}`,
-			);
-			if (savedUserInfo) {
-				localStorage.setItem("userInfo", savedUserInfo);
-			}
-		}
-	};
+            if (isElectron()) {
+                // Electron 환경에서는 electron-store 사용
+                console.log('Saving user info to electron-store');
+                await window.electronAPI.setStoreValue('user', userData);
 
-	const handleGoogleLogin = async () => {
-		if (isElectron()) {
-			window.electronAPI.openGoogleAuth();
-		} else {
-			// 웹에서 OAuth 처리
-			try {
-				const width = 500;
-				const height = 600;
-				const left = window.screenX + (window.outerWidth - width) / 2;
-				const top = window.screenY + (window.outerHeight - height) / 2;
+                // 저장 후 바로 확인
+                const savedUser = await window.electronAPI.getStoreValue('user');
+                console.log('Saved user info in electron-store:', savedUser);
 
-				const popup = window.open(
-					`https://accounts.google.com/o/oauth2/v2/auth?` +
-						`client_id=${import.meta.env.VITE_GOOGLE_CLIENT_ID}&` +
-						`redirect_uri=${window.location.origin}/auth/callback&` +
-						`response_type=code&` +
-						`scope=openid email profile&` +
-						`access_type=offline&` +
-						`prompt=consent`,
-					"google-oauth",
-					`width=${width},height=${height},left=${left},top=${top}`,
-				);
+                if (!savedUser) {
+                    throw new Error('Failed to save user data to electron-store');
+                }
 
-				const checkInterval = setInterval(() => {
-					if (popup?.closed) {
-						clearInterval(checkInterval);
-					}
-				}, 1000);
-			} catch (error) {
-				console.error("OAuth 시작 실패:", error);
-			}
-		}
-	};
+                // 사용자 정보 확인 후 페이지 이동
+                const storedUserInfo = await window.electronAPI.getStoreValue(`userInfo_${userData.googleId}`);
+                console.log('Existing user info from electron-store:', storedUserInfo);
 
-	return (
-		<LoginContainer>
-			<GraduateLogo src={Graduate} />
+                if (storedUserInfo) {
+                    console.log('User info exists, navigating to main page');
+                    navigate('/', { replace: true });
+                } else {
+                    console.log('No user info found, navigating to semester page');
+                    // 서버 연결 실패 시에도 semester 페이지로 이동
+                    navigate('/semester', { replace: true });
+                }
 
-			<Title>GRADUABLE</Title>
-			<Subtitle onClick={handleGoogleLogin}>
-				구글로 로그인 및 회원가입 하기
-			</Subtitle>
-		</LoginContainer>
-	);
+                // 백그라운드에서 사용자 정보 가져오기
+                if (!storedUserInfo) {
+                    try {
+                        console.log('Fetching user info from server in background');
+                        const serverUrl = import.meta.env.VITE_SERVER_URL;
+                        if (serverUrl) {
+                            const response = await axios.get(`${serverUrl}/user/info/${userData.googleId}`);
+                            if (response.data) {
+                                console.log('Received user info from server:', response.data);
+                                await window.electronAPI.setStoreValue(`userInfo_${userData.googleId}`, response.data);
+
+                                // 저장 후 확인
+                                const savedUserInfo = await window.electronAPI.getStoreValue(
+                                    `userInfo_${userData.googleId}`
+                                );
+                                console.log('Saved user info from server:', savedUserInfo);
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Failed to fetch user info from server:', error);
+                        console.log('No existing user info found, proceeding as new user');
+                        // 서버 연결 실패 시에도 기본 사용자 정보 저장
+                        await window.electronAPI.setStoreValue(`userInfo_${userData.googleId}`, {
+                            ...userData,
+                            isNewUser: true,
+                        });
+                    }
+                }
+            } else {
+                // 웹 환경에서는 localStorage 사용
+                console.log('Saving user info to localStorage');
+                localStorage.setItem('user', JSON.stringify(userData));
+                console.log('User info saved to localStorage');
+
+                // 사용자 정보 확인 후 페이지 이동
+                const storedUserInfo = localStorage.getItem(`userInfo_${userData.googleId}`);
+                console.log('Existing user info from localStorage:', storedUserInfo);
+
+                if (storedUserInfo) {
+                    console.log('User info exists, navigating to main page');
+                    navigate('/', { replace: true });
+                } else {
+                    console.log('No user info found, navigating to semester page');
+                    navigate('/semester', { replace: true });
+                }
+
+                // 백그라운드에서 사용자 정보 가져오기
+                if (!storedUserInfo) {
+                    try {
+                        console.log('Fetching user info from server in background');
+                        const serverUrl = import.meta.env.VITE_SERVER_URL;
+                        if (serverUrl) {
+                            const response = await axios.get(`${serverUrl}/user/info/${userData.googleId}`);
+                            if (response.data) {
+                                localStorage.setItem(`userInfo_${userData.googleId}`, JSON.stringify(response.data));
+                                console.log('User info saved from server:', response.data);
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Failed to fetch user info from server:', error);
+                        console.log('No existing user info found, proceeding as new user');
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Login process failed:', error);
+            alert('로그인에 실패했습니다. 다시 시도해주세요.');
+        }
+    };
+
+    const handleKakaoLogin = () => {
+        try {
+            setIsLoading(true);
+            console.log('Starting Kakao login with redirect URI:', KAKAO_CONFIG.REDIRECT_URI);
+            window.Kakao.Auth.authorize({
+                redirectUri: KAKAO_CONFIG.REDIRECT_URI,
+                scope: KAKAO_CONFIG.SCOPE,
+            });
+        } catch (error) {
+            console.error('Kakao login failed:', error);
+            alert('로그인에 실패했습니다.');
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <LoginContainer>
+            <GraduateLogo src={Graduate} />
+            <Title>GRADUABLE</Title>
+            <Subtitle onClick={handleKakaoLogin} disabled={isLoading}>
+                카카오로 로그인 및 회원가입 하기
+            </Subtitle>
+        </LoginContainer>
+    );
 }

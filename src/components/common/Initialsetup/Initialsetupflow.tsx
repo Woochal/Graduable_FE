@@ -21,11 +21,9 @@ export default function InitialSetupFlow({
 	const [setupData, setSetupData] = useState<{
 		currentSemester: number;
 		currentSemesterInfo: SemesterInfo | null;
-		graduationText: string; // 추가
 	}>({
 		currentSemester: 0,
 		currentSemesterInfo: null,
-		graduationText: "", // 추가
 	});
 
 	const handleSemesterNext = (semester: number) => {
@@ -33,12 +31,56 @@ export default function InitialSetupFlow({
 		setCurrentStep(2);
 	};
 
-	const handleYearSemesterNext = (year: number, semester: 1 | 2) => {
-		setSetupData({
+	const handleYearSemesterNext = async (year: number, semester: 1 | 2) => {
+		const newSetupData = {
 			...setupData,
 			currentSemesterInfo: { year, semester },
-		});
+		};
+		setSetupData(newSetupData);
+
+		// Step 2 완료 후 기본 정보만 서버에 전송
+		await sendBasicUserInfo(newSetupData);
+
+		// 다음 단계로 이동
 		setCurrentStep(3);
+	};
+
+	// 기본 사용자 정보만 서버에 전송하는 함수
+	// 기본 사용자 정보만 서버에 전송하는 함수
+	const sendBasicUserInfo = async (data: typeof setupData) => {
+		let currentUser;
+		if (isElectron()) {
+			currentUser = await window.electronAPI.getStoreValue("user");
+		} else {
+			currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+		}
+		console.log("currentUser:", data);
+		const userName = currentUser.name || "사용자";
+		// API 형식에 맞게 데이터 구성
+		const signupData = {
+			userName: userName, // 기본값 적용
+			userNickname: userName, // 닉네임도 name과 동일하게 설정
+			userSemester: data.currentSemester,
+			googleId: currentUser.googleId,
+			email: currentUser.email,
+			yearOfSemester: data?.currentSemesterInfo?.year,
+			semesterInYear: data?.currentSemesterInfo?.semester,
+		};
+
+		try {
+			const serverUrl = import.meta.env.VITE_SERVER_URL;
+			if (serverUrl) {
+				await axios.post(`${serverUrl}/user/sign_up`, signupData, {
+					headers: {
+						"Content-Type": "application/json",
+					},
+				});
+				console.log("구글 로그인 성공data확인:", signupData);
+				console.log("서버에 기본 사용자 정보 저장 완료");
+			}
+		} catch (error) {
+			console.error("서버 업데이트 실패:", error);
+		}
 	};
 
 	const handleYearSemesterBack = () => {
@@ -46,14 +88,44 @@ export default function InitialSetupFlow({
 	};
 
 	// GraduationInfo에서 호출될 함수
-	const handleGraduationTextSubmit = (text?: string) => {
-		setSetupData({ ...setupData, graduationText: text || "" });
-		handleGraduationComplete(text);
+	const handleGraduationTextSubmit = async (text?: string) => {
+		if (text) {
+			await sendGraduationText(text);
+		}
+		completeSetup();
 	};
 
-	const handleGraduationComplete = async (graduationText?: string) => {
-		if (!setupData.currentSemesterInfo) return;
+	// 졸업심사 텍스트만 서버에 전송하는 함수
+	const sendGraduationText = async (graduationText: string) => {
+		let currentUser;
+		if (isElectron()) {
+			currentUser = await window.electronAPI.getStoreValue("user");
+		} else {
+			currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+		}
 
+		try {
+			const serverUrl = import.meta.env.VITE_SERVER_URL;
+			if (serverUrl && graduationText.trim()) {
+				await axios.post(
+					`${serverUrl}/grade/${currentUser.googleId}`,
+					graduationText,
+					{
+						headers: {
+							"Content-Type": "text/plain", // 텍스트 형태로 전송
+						},
+					},
+				);
+				console.log("서버에 졸업심사 정보 저장 완료");
+				console.log("전송된 졸업심사 정보:", currentUser.googleId);
+			}
+		} catch (error) {
+			console.error("졸업심사 정보 전송 실패:", error);
+		}
+	};
+
+	// 설정 완료 및 로컬 저장 처리
+	const completeSetup = async () => {
 		let currentUser;
 		if (isElectron()) {
 			currentUser = await window.electronAPI.getStoreValue("user");
@@ -63,52 +135,34 @@ export default function InitialSetupFlow({
 
 		const completeUserInfo: UserInfo = {
 			...currentUser,
-			currentSemester: setupData.currentSemester,
+			userSemester: setupData.currentSemester, // currentSemester 대신 userSemester 사용
 			currentSemesterInfo: setupData.currentSemesterInfo,
+			userNickname: currentUser.name, // 기본값으로 name과 동일하게 설정
 		};
 
-		try {
-			// 로컬 저장
-			if (isElectron()) {
-				await window.electronAPI.setStoreValue("user", completeUserInfo);
-				await window.electronAPI.setStoreValue("userInfo", completeUserInfo);
-				await window.electronAPI.setStoreValue(
-					`userInfo_${currentUser.googleId}`,
-					completeUserInfo,
-				);
-			} else {
-				localStorage.setItem("user", JSON.stringify(completeUserInfo));
-				localStorage.setItem("userInfo", JSON.stringify(completeUserInfo));
-				localStorage.setItem(
-					`userInfo_${currentUser.googleId}`,
-					JSON.stringify(completeUserInfo),
-				);
-			}
-
-			// 서버에 신규 가입 정보 전송 (졸업심사 텍스트 포함)
-			const serverUrl = import.meta.env.VITE_API_URL;
-			if (serverUrl) {
-				try {
-					const requestData = {
-						...completeUserInfo,
-						graduationText: graduationText || setupData.graduationText, // 졸업심사 텍스트 추가
-					};
-
-					await axios.post(`${serverUrl}/user/signup`, requestData, {
-						headers: {
-							"Content-Type": "application/json",
-						},
-					});
-					console.log("서버에 신규 가입 정보 저장 완료");
-				} catch (error) {
-					console.error("서버 업데이트 실패:", error);
-				}
-			}
-
-			onComplete();
-		} catch (error) {
-			console.error("Error saving user info:", error);
+		// 로컬 저장
+		if (isElectron()) {
+			await window.electronAPI.setStoreValue("user", completeUserInfo);
+			await window.electronAPI.setStoreValue("userInfo", completeUserInfo);
+			await window.electronAPI.setStoreValue(
+				`userInfo_${currentUser.googleId}`,
+				completeUserInfo,
+			);
+		} else {
+			localStorage.setItem("user", JSON.stringify(completeUserInfo));
+			localStorage.setItem("userInfo", JSON.stringify(completeUserInfo));
+			localStorage.setItem(
+				`userInfo_${currentUser.googleId}`,
+				JSON.stringify(completeUserInfo),
+			);
 		}
+
+		onComplete();
+	};
+
+	// 건너뛰기 처리
+	const handleSkipGraduation = async () => {
+		completeSetup();
 	};
 
 	const renderStep = () => {
@@ -126,8 +180,8 @@ export default function InitialSetupFlow({
 			case 3:
 				return (
 					<GraduationInfo
-						onComplete={handleGraduationTextSubmit} // 수정
-						onSkip={() => handleGraduationComplete()} // 건너뛰기
+						onComplete={handleGraduationTextSubmit}
+						onSkip={handleSkipGraduation}
 					/>
 				);
 			default:

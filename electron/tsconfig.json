@@ -1,29 +1,23 @@
 {
-	"compilerOptions": {
-		"target": "es5",
-		"lib": ["dom", "dom.iterable", "esnext"],
-		"allowJs": true,
-		"skipLibCheck": true,
-		"strict": true,
-		"forceConsistentCasingInFileNames": true,
-		"noEmit": false,
-		"esModuleInterop": true,
-		"module": "commonjs",
-		"moduleResolution": "node",
-		"resolveJsonModule": true,
-		"isolatedModules": true,
-		"jsx": "preserve",
-		"incremental": true,
-		"baseUrl": ".",
-		"rootDir": ".", // 현재 .ts 위치 기준
-		"outDir": "../src/electron", // ✅ 컴파일 결과가 이 위치로 나가게 함
-		"typeRoots": ["../node_modules/@types", "../@types"]
-	},
-	"include": [
-		"*.ts",
-		"../src/types/electron-store.d.ts",
-		"../src/types/electron.d.ts"
-	],
-	// 파일 참조를 통해 global하게 사용
-	"exclude": ["node_modules", "../components", "../public", "../types"]
+    "compilerOptions": {
+        "target": "ES2020",
+        "module": "CommonJS",
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+        "strict": true,
+        "outDir": "../dist/electron",
+        "rootDir": ".",
+        "sourceMap": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "resolveJsonModule": true,
+        "allowJs": true,
+        "isolatedModules": true,
+        "noEmit": false,
+        "jsx": "react-jsx",
+        "lib": ["DOM", "ES2020"],
+        "types": ["node", "electron"]
+    },
+    "include": ["*.ts", "../src/types/electron-store.d.ts", "../src/types/electron.d.ts"],
+    "exclude": ["node_modules", "../components", "../public", "../types"]
 }

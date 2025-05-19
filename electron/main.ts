@@ -1,285 +1,384 @@
 // electron/main.ts
-import * as dotenv from "dotenv";
-dotenv.config();
+const dotenv = require('dotenv');
+const { app, BrowserWindow, ipcMain, protocol } = require('electron');
+const path = require('node:path');
+const Store = require('electron-store');
+const fs = require('node:fs');
+const { join } = require('path');
 
-import { app, BrowserWindow, ipcMain } from "electron";
-import serve from "electron-serve";
-import path from "node:path";
-import Store from "electron-store";
-import express from "express";
-import axios from "axios";
+// 로그 출력을 위한 함수
+const log = (message: string, data?: unknown) => {
+    const timestamp = new Date().toISOString();
+    console.log(`[${timestamp}] ${message}`);
+    if (data) {
+        console.log(JSON.stringify(data, null, 2));
+    }
+};
+
+// 환경 변수 로드 설정
+if (app.isPackaged) {
+    const possiblePaths = [
+        path.join(process.resourcesPath, '.env'),
+        path.join(__dirname, '.env'),
+        path.join(__dirname, '../.env'),
+        path.join(__dirname, '../../.env'),
+        path.join(app.getAppPath(), '.env'),
+    ];
+
+    log('Searching for .env file in:', possiblePaths);
+
+    let envLoaded = false;
+    for (const envPath of possiblePaths) {
+        if (fs.existsSync(envPath)) {
+            log('Found .env file at:', envPath);
+            dotenv.config({ path: envPath });
+            envLoaded = true;
+            break;
+        }
+    }
+
+    if (!envLoaded) {
+        log('No .env file found, using default environment variables');
+        process.env.NODE_ENV = 'production';
+    }
+} else {
+    dotenv.config();
+}
+
+// 환경 변수 로드 확인
+log('Environment variables:', {
+    NODE_ENV: process.env.NODE_ENV,
+    VITE_KAKAO_JAVASCRIPT_KEY: process.env.VITE_KAKAO_JAVASCRIPT_KEY ? 'Set' : 'Not set',
+    VITE_KAKAO_REST_API_KEY: process.env.VITE_KAKAO_REST_API_KEY ? 'Set' : 'Not set',
+    VITE_SERVER_URL: process.env.VITE_SERVER_URL,
+});
 
 interface WindowConfig {
-	width?: number;
-	height?: number;
-	x?: number;
-	y?: number;
+    width?: number;
+    height?: number;
+    x?: number;
+    y?: number;
 }
 
 interface StoreSchema {
-	"window-config": WindowConfig;
-	user: any;
-	userInfo: any;
-	[key: `userInfo_${string}`]: any; // googleId별 저장
+    'window-config': WindowConfig;
+    user: Record<string, unknown>;
+    userInfo: Record<string, unknown>;
+    [key: `userInfo_${string}`]: Record<string, unknown>;
 }
 
-const isProd = process.env.NODE_ENV === "production";
-const store = new Store<StoreSchema>();
+// Store 초기화
+const store = new Store();
+log('Store initialized');
 
-// 개발 환경에서 SSL 인증서 검증 무시
-if (!isProd) {
-	app.commandLine.appendSwitch("ignore-certificate-errors");
-	process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
-}
-
-if (isProd) {
-	serve({ directory: "out" });
+if (!app.isPackaged) {
+    app.commandLine.appendSwitch('ignore-certificate-errors');
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 } else {
-	app.setPath("userData", `${app.getPath("userData")} (development)`);
+    app.commandLine.appendSwitch('ignore-certificate-errors');
+    app.commandLine.appendSwitch('disable-site-isolation-trials');
+    app.commandLine.appendSwitch('disable-features', 'OutOfBlinkCors');
+    app.commandLine.appendSwitch('disable-web-security');
+    app.commandLine.appendSwitch('allow-running-insecure-content');
 }
 
-let mainWindow: BrowserWindow | null = null;
-let authWindow: BrowserWindow | null = null;
-let authServer: any = null;
+if (!app.isPackaged) {
+    app.setPath('userData', `${app.getPath('userData')} (development)`);
+}
 
-// 사용 가능한 포트 찾기
-const findAvailablePort = (): Promise<number> => {
-	return new Promise((resolve) => {
-		const server = express().listen(0, "localhost", () => {
-			const port = (server.address() as any).port;
-			server.close(() => resolve(port));
-		});
-	});
-};
+let mainWindow: Electron.BrowserWindow | null = null;
 
-// OAuth 로컬 서버 시작
-const startAuthServer = (port: number): Promise<void> => {
-	return new Promise((resolve) => {
-		const app = express();
+// 프로토콜 등록을 app.whenReady() 이전에 수행
+protocol.registerSchemesAsPrivileged([
+    { scheme: 'http', privileges: { secure: true, standard: true, supportFetchAPI: true } },
+    { scheme: 'file', privileges: { secure: true, standard: true } },
+]);
 
-		app.get("/auth/callback", async (req, res) => {
-			const { code, error } = req.query;
+// serve({ directory: 'out' }) 제거
+// mainWindow 생성 보장 함수
+async function ensureMainWindow() {
+    if (!mainWindow) {
+        await createMainWindow();
+    }
+    return mainWindow;
+}
 
-			if (error) {
-				res.send(`
-					<html>
-						<body>
-							<h1>인증 실패</h1>
-							<p>${error}</p>
-						</body>
-					</html>
-				`);
-				mainWindow?.webContents.send("oauth-error", error);
-				return;
-			}
+app.whenReady().then(() => {
+    // 프로토콜 핸들러 등록
+    protocol.registerHttpProtocol(
+        'http',
+        (request: Electron.ProtocolRequest, callback: (response: Electron.ProtocolResponse) => void) => {
+            const url = request.url;
+            log('HTTP protocol request received:', url);
 
-			try {
-				// Google OAuth 처리
-				const tokenResponse = await axios.post(
-					"https://oauth2.googleapis.com/token",
-					{
-						code,
-						client_id: process.env.VITE_GOOGLE_CLIENT_ID,
-						client_secret: process.env.VITE_GOOGLE_CLIENT_SECRET,
-						redirect_uri: `http://localhost:${port}/auth/callback`,
-						grant_type: "authorization_code",
-					},
-				);
+            try {
+                // auth 리디렉션 처리
+                if (url.startsWith('http://localhost/auth')) {
+                    log('Auth redirect detected:', url);
+                    if (!mainWindow) {
+                        log('Main window not found, creating new window');
+                        createMainWindow();
+                    }
 
-				const { access_token } = tokenResponse.data;
+                    // URL에서 code 파라미터 추출
+                    const code = new URL(url).searchParams.get('code');
+                    log('Extracted code:', code);
 
-				// 사용자 정보 가져오기
-				const userResponse = await axios.get(
-					"https://www.googleapis.com/oauth2/v2/userinfo",
-					{
-						headers: { Authorization: `Bearer ${access_token}` },
-					},
-				);
+                    if (code) {
+                        // 프로덕션 환경에서는 file:// 프로토콜 사용
+                        const indexPath = join(__dirname, '../index.html');
+                        log('Loading file:', indexPath);
 
-				const userData = userResponse.data;
+                        if (app.isPackaged) {
+                            log('Loading production build with code:', code);
+                            const targetUrl = `file://${indexPath}?code=${code}`;
+                            log('Target URL:', targetUrl);
+                            mainWindow?.loadURL(targetUrl);
+                        } else {
+                            const port = process.argv[2] || 5173;
+                            const devUrl = `http://localhost:${port}/?code=${code}`;
+                            log('Loading development URL:', devUrl);
+                            mainWindow?.loadURL(devUrl);
+                        }
+                    }
+                    return;
+                }
 
-				// 메인 창으로 사용자 정보 전달
-				mainWindow?.webContents.send("oauth-success", {
-					googleId: userData.id,
-					email: userData.email,
-					name: userData.name,
-				});
+                // localhost:5173 요청은 Vite 개발 서버로 전달
+                if (url.startsWith('http://localhost:5173')) {
+                    log('Allowing Vite dev server request:', url);
+                    callback({ url });
+                    return;
+                }
 
-				res.send(`
-					<html>
-						<body>
-							<h1>인증 성공!</h1>
-							<p>이 창은 자동으로 닫힙니다.</p>
-							<script>
-								setTimeout(() => { window.close(); }, 1500);
-							</script>
-						</body>
-					</html>
-				`);
-			} catch (error) {
-				console.error("OAuth 처리 실패:", error);
-				res.status(500).send("인증 처리 중 오류가 발생했습니다.");
-				mainWindow?.webContents.send("oauth-error", "인증 실패");
-			}
+                // 다른 모든 요청은 그대로 전달
+                callback({ url });
+            } catch (error) {
+                log('Error in HTTP protocol handler:', error);
+                callback({ url });
+            }
+        }
+    );
 
-			if (authWindow && !authWindow.isDestroyed()) {
-				setTimeout(() => {
-					authWindow?.close();
-				}, 2000);
-			}
-		});
+    protocol.registerFileProtocol(
+        'file',
+        (request: Electron.ProtocolRequest, callback: (response: Electron.ProtocolResponse) => void) => {
+            const url = request.url;
+            log('File protocol request received:', url);
 
-		authServer = app.listen(port, "localhost", () => {
-			console.log(`OAuth 서버 시작: http://localhost:${port}`);
-			resolve();
-		});
-	});
-};
+            try {
+                if (url.includes('/auth')) {
+                    log('Auth redirect detected in file protocol:', url);
+                    if (!mainWindow) {
+                        log('Main window not found, creating new window');
+                        createMainWindow();
+                    }
 
-// Google OAuth 창 생성
-const createAuthWindow = async () => {
-	try {
-		const port = await findAvailablePort();
-		await startAuthServer(port);
+                    const code = new URL(url).searchParams.get('code');
+                    log('Extracted code from file protocol:', code);
 
-		authWindow = new BrowserWindow({
-			width: 600,
-			height: 700,
-			webPreferences: {
-				nodeIntegration: false,
-				contextIsolation: true,
-			},
-			parent: mainWindow || undefined,
-			modal: true,
-		});
+                    if (code) {
+                        const indexPath = join(__dirname, '../index.html');
+                        log('Loading file with code:', code);
+                        mainWindow?.loadFile(indexPath, {
+                            query: { code },
+                        });
+                    }
+                    return;
+                }
 
-		const clientId = process.env.VITE_GOOGLE_CLIENT_ID;
+                callback({ path: url });
+            } catch (error) {
+                log('Error in File protocol handler:', error);
+                callback({ path: url });
+            }
+        }
+    );
 
-		if (!clientId) {
-			console.error("Google Client ID가 설정되지 않았습니다!");
-			mainWindow?.webContents.send(
-				"oauth-error",
-				"Client ID가 설정되지 않았습니다.",
-			);
-			return;
-		}
+    protocol.registerHttpProtocol(
+        'graduable',
+        async (request: Electron.ProtocolRequest, callback: (response: Electron.ProtocolResponse) => void) => {
+            const url = request.url;
+            log('Graduable protocol request received:', url);
 
-		const redirectUri = `http://localhost:${port}/auth/callback`;
+            if (url.includes('/auth')) {
+                log('Auth redirect detected:', url);
+                const win = await ensureMainWindow();
+                if (win) {
+                    const code = new URL(url).searchParams.get('code');
+                    const userInfo = await store.get('userInfo');
+                    const targetPath = userInfo ? '/' : '/semester';
+                    if (code) {
+                        log('Auth code received:', code);
+                        win.loadFile(join(__dirname, '../index.html'), {
+                            query: { code },
+                            hash: targetPath,
+                        });
+                    } else {
+                        win.loadFile(join(__dirname, '../index.html'), {
+                            hash: targetPath,
+                        });
+                    }
+                } else {
+                    log('Main window not found');
+                }
+                return;
+            }
+            callback({ url });
+        }
+    );
 
-		const authUrl =
-			`https://accounts.google.com/o/oauth2/v2/auth?` +
-			`client_id=${clientId}&` +
-			`redirect_uri=${encodeURIComponent(redirectUri)}&` +
-			`response_type=code&` +
-			`scope=openid email profile&` +
-			`access_type=offline&` +
-			`prompt=consent`;
+    log('App is ready');
+    createMainWindow();
+});
 
-		authWindow.loadURL(authUrl);
-
-		authWindow.on("closed", () => {
-			authWindow = null;
-			if (authServer) {
-				authServer.close();
-				authServer = null;
-			}
-		});
-	} catch (error) {
-		console.error("OAuth 창 생성 실패:", error);
-		if (authServer) {
-			authServer.close();
-			authServer = null;
-		}
-	}
-};
-
-// 메인 윈도우 생성
 const createMainWindow = async () => {
-	const windowConfig = store.get("window-config") || {};
+    try {
+        const windowConfig = store.get('window-config') || {};
+        log('Creating main window with config:', windowConfig);
 
-	mainWindow = new BrowserWindow({
-		width: 1280,
-		height: 832,
-		minWidth: 1280,
-		minHeight: 800,
-		useContentSize: true, // width/height가 콘텐츠 크기만으로 되도록. 이거 없으면 앱 상단 메뉴도 포함되서 계산됨
-		x: windowConfig.x,
-		y: windowConfig.y,
-		webPreferences: {
-			nodeIntegration: false,
-			contextIsolation: true,
-			preload: path.join(__dirname, "preload.js"),
-		},
-	});
+        mainWindow = new BrowserWindow({
+            width: 1280,
+            height: 832,
+            minWidth: 1280,
+            minHeight: 800,
+            x: windowConfig.x,
+            y: windowConfig.y,
+            icon: join(__dirname, '../../src/assets/Logo.png'),
+            webPreferences: {
+                nodeIntegration: false,
+                contextIsolation: true,
+                preload: join(__dirname, 'preload.js'),
+                webSecurity: false,
+                allowRunningInsecureContent: true,
+                webviewTag: true,
+                partition: 'persist:main',
+            },
+        });
 
-	if (isProd) {
-		await mainWindow.loadURL("app://./index.html");
-	} else {
-		const port = process.argv[2] || 5173;
-		await mainWindow.loadURL(`http://localhost:${port}/`);
-		// mainWindow.webContents.openDevTools();
-	}
+        if (!mainWindow) {
+            throw new Error('Failed to create main window');
+        }
 
-	// 창 크기 로그 출력
-	const size = mainWindow.getSize();
-	console.log(`Window size: ${size[0]}x${size[1]}`);
-	
-	// // 창 크기 변경 시 로그 출력
-	// mainWindow.on('resize', () => {
-	// 	const newSize = mainWindow?.getSize();
-	// 	if (newSize) {
-	// 		console.log(`Window resized: ${newSize[0]}x${newSize[1]}`);
-	// 	}
-	// });
+        // 네트워크 요청 인터셉트
+        mainWindow.webContents.session.webRequest.onBeforeRequest(
+            { urls: ['http://localhost/auth*', 'http://localhost:5173/auth*'] },
+            async (details, callback) => {
+                log('Intercepted request:', details.url);
+                const url = new URL(details.url);
+                const code = url.searchParams.get('code');
 
-	mainWindow.on("close", () => {
-		if (!mainWindow?.isMaximized()) {
-			const bounds = mainWindow?.getBounds();
-			if (bounds) {
-				store.set("window-config", bounds);
-			}
-		}
-	});
+                if (code) {
+                    log('Auth code received:', code);
 
-	mainWindow.on("closed", () => {
-		mainWindow = null;
-	});
+                    // 인증 코드를 store에 저장
+                    store.set('auth_code', code);
+                    log('Auth code saved to store');
+
+                    // 메인 페이지로 이동
+                    if (app.isPackaged) {
+                        const indexPath = join(__dirname, '../index.html');
+                        log('Loading production build');
+                        await mainWindow?.loadFile(indexPath);
+                    } else {
+                        const port = process.argv[2] || 5173;
+                        const devUrl = `http://localhost:${port}/`;
+                        log('Loading development URL:', devUrl);
+                        await mainWindow?.loadURL(devUrl);
+                    }
+
+                    // 페이지 로드 후 IPC 이벤트 전송
+                    mainWindow?.webContents.once('did-finish-load', () => {
+                        log('Page loaded, sending auth code via IPC');
+                        mainWindow?.webContents.send('auth-code', code);
+                    });
+
+                    callback({ cancel: true });
+                } else {
+                    callback({ cancel: false });
+                }
+            }
+        );
+
+        mainWindow.webContents.setUserAgent(
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36'
+        );
+
+        // 개발자 도구 자동 열기
+        mainWindow.webContents.openDevTools();
+
+        // 페이지 로드 이벤트 리스너
+        mainWindow.webContents.on('did-finish-load', () => {
+            log('Page loaded successfully');
+        });
+
+        mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+            log('Page load failed:', { errorCode, errorDescription });
+        });
+
+        if (app.isPackaged) {
+            log('Loading production build');
+            const indexPath = join(__dirname, '../index.html');
+            log('Loading file:', indexPath);
+            await mainWindow.loadFile(indexPath, {
+                hash: '/',
+            });
+        } else {
+            const port = process.argv[2] || 5173;
+            const url = `http://localhost:${port}/`;
+            log('Loading development build:', url);
+            await mainWindow.loadURL(url);
+        }
+
+        mainWindow.on('close', () => {
+            const currentWindow = mainWindow;
+            if (currentWindow && !currentWindow.isMaximized()) {
+                const bounds = currentWindow.getBounds();
+                if (bounds) {
+                    store.set('window-config', bounds);
+                }
+            }
+        });
+
+        mainWindow.on('closed', () => {
+            mainWindow = null;
+        });
+
+        return mainWindow;
+    } catch (error) {
+        log('Error creating main window:', error);
+        throw error;
+    }
 };
 
 // IPC 핸들러들
-ipcMain.handle("get-store-value", (_, key: string) => {
-	return store.get(key);
+ipcMain.handle('get-store-value', (_: Electron.IpcMainInvokeEvent, key: string) => {
+    return store.get(key);
 });
 
-ipcMain.handle("set-store-value", (_, key: string, value: any) => {
-	store.set(key, value);
+ipcMain.handle('set-store-value', (_: Electron.IpcMainInvokeEvent, key: string, value: unknown) => {
+    store.set(key, value);
 });
 
-ipcMain.handle("open-google-auth", () => {
-	createAuthWindow();
+ipcMain.handle('remove-store-value', (_: Electron.IpcMainInvokeEvent, key: string) => {
+    store.delete(key);
 });
 
-ipcMain.handle("remove-store-value", (_, key: string) => {
-	store.delete(key);
+// 로그아웃 핸들러
+ipcMain.handle('logout', () => {
+    store.delete('user');
+    store.delete('userInfo');
+    log('User logged out');
 });
 
-// 로그아웃 - user와 userInfo 모두 삭제
-ipcMain.handle("logout", () => {
-	store.delete("user");
-	store.delete("userInfo");
+app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') {
+        app.quit();
+    }
 });
 
-// 앱 이벤트 핸들러
-app.on("ready", createMainWindow);
-
-app.on("window-all-closed", () => {
-	if (process.platform !== "darwin") {
-		app.quit();
-	}
-});
-
-app.on("activate", () => {
-	if (mainWindow === null) {
-		createMainWindow();
-	}
+app.on('activate', () => {
+    if (mainWindow === null) {
+        createMainWindow();
+    }
 });

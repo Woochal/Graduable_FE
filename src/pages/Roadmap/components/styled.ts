@@ -109,13 +109,14 @@ export const SemesterGrid = styled.div`
     box-sizing: border-box;
 `;
 
-export const SemesterCard = styled.div`
+export const SemesterCard = styled.div<{ isSelected: boolean }>`
     width: 212px;
     height: 250px;
     background-color: rgba(24, 24, 34, 1);
     border-radius: 10px;
     display: flex;
     flex-direction: column;
+    border: 1px solid ${(props) => (props.isSelected ? 'rgba(167, 224, 217, 1)' : 'none')};
 `;
 
 export const CourseList = styled.div`

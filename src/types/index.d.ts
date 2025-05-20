@@ -32,9 +32,17 @@ export interface CourseDataType {
     classroom?: string;
 }
 
-export interface RoadmapSemesterData {
-    year: number;
-    semester: number;
-    semesterN: number;
-    courses: CourseDataType[];
+// 학기별 데이터 타입
+export interface SemesterCoursesType {
+    [key: string]: RoadmapCourseDataType[];  // 예: "2024-1": [과목1, 과목2, ...]
+}
+
+// 전체 로드맵 데이터 타입
+export type RoadmapSemesterData = SemesterCoursesType[];
+
+export interface RoadmapCourseDataType {
+    courseName: string;
+    credit: number;
+    category: boolean; // 전공 여부
+    yearAndSemester: string; // 2024-1
 }

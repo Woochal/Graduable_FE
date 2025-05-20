@@ -1,7 +1,7 @@
 import React from 'react';
 import * as S from '../styled';
 import RoadmapCourse from './RoadmapCourse';
-import { CourseDataType, RoadmapSemesterData } from '../../../../types';
+import { CourseDataType, RoadmapSemesterData, RoadmapCourseDataType } from '../../../../types';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getCurrentSemesterRoadmapAPI } from '../../../../axios/DashboardApi';
@@ -12,13 +12,14 @@ const Roadmap = () => {
   const navigate = useNavigate();
   const userData = useRecoilValue(userDataRecoil);
 
-  const { data: roadmapSemesterData } = useQuery<RoadmapSemesterData>({
+  const { data: roadmapSemesterData = [] } = useQuery<RoadmapCourseDataType[]>({
     queryKey: ['roadmap'],
-    queryFn: () => getCurrentSemesterRoadmapAPI(userData.uid),
+    queryFn: () => getCurrentSemesterRoadmapAPI(userData.googleId),
   });
 
-  const roadmapCourseData = roadmapSemesterData?.courses || [];
-  const totalCredit = roadmapCourseData.reduce((acc: number, course: CourseDataType) => acc + course.credit, 0);
+  console.log(roadmapSemesterData);
+
+  const totalCredit = roadmapSemesterData.reduce((acc: number, course: RoadmapCourseDataType) => acc + course.credit, 0);
 
   // const roadmapCourseData : CourseDataType[] = [
   //   {
@@ -86,7 +87,7 @@ const Roadmap = () => {
 
       <S.RoadmapContent>
 
-        <RoadmapCourse courseData={roadmapCourseData} />
+        <RoadmapCourse courseData={roadmapSemesterData} />
 
         <S.CourseInformation>
           
@@ -106,7 +107,7 @@ const Roadmap = () => {
         </S.CourseInformation>
 
         <S.RoadmapSemester>
-          {roadmapSemesterData?.semesterN}학기 ({roadmapSemesterData?.year}년 {roadmapSemesterData?.semester}학기)
+          {userData.userSemester}학기 ({roadmapSemesterData[0]?.yearAndSemester?.substring(0, 4)}년 {roadmapSemesterData[0]?.yearAndSemester?.substring(4, 6)}학기)
         </S.RoadmapSemester>
 
       </S.RoadmapContent>

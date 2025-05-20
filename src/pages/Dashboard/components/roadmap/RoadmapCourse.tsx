@@ -1,16 +1,16 @@
 import React from 'react';
 import * as S from '../styled';
-import { CourseDataType } from '../../../../types';
+import { RoadmapCourseDataType } from '../../../../types';
 import Course from './Course';
-const RoadmapCourse = ({courseData} : {courseData: CourseDataType[]}) => {
+const RoadmapCourse = ({courseData} : {courseData: RoadmapCourseDataType[]}) => {
 
-  const majorData : CourseDataType[] = courseData.filter((course) => course.major);
-  const liberalData : CourseDataType[] = courseData.filter((course) => !course.major);
+  const categoryData : RoadmapCourseDataType[] = courseData.filter((course) => course.category);
+  const liberalData : RoadmapCourseDataType[] = courseData.filter((course) => !course.category);
 
   return (
     <S.RoadmapCourse>
       <S.RoadmapMajor>
-        {majorData.map((course, index) => (
+        {categoryData.map((course, index) => (
           <Course key={index} {...course} />
         ))}
       </S.RoadmapMajor>

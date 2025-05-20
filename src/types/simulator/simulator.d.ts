@@ -5,7 +5,7 @@ export interface SemesterFilterType {
 
 // 추가하고 싶은 과목 선택할 때 필요한 데이터
 export interface CourseDataAllType {
-    id: string;
+    id: number;
     time: string;
     name: string;
     credit: number;

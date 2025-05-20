@@ -16,7 +16,8 @@ const SelectedCourseList = ({ selectedCourseList, handleDeleteCourse }: { select
   const handleSemesterUpdate = async (semester: number) =>  {
     // TODO: 로드맵에 추가
     try {
-      const response = await saveSemesterRoadmapAPI(userData.googleId, semester, selectedCourseList);
+      const selectedCourseIdList = selectedCourseList.map((course) => Number(course.id));
+      const response = await saveSemesterRoadmapAPI(userData.googleId, semester, selectedCourseIdList);
     } catch (error) {
       console.error(error);
     }

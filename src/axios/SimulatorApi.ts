@@ -23,12 +23,13 @@ export const getSearchCourseAPI = async (text: string) => {
     }
 };
 
-export const saveSemesterRoadmapAPI = async (googleId: string, semester: number, courseList: CourseDataAllType[]) => {
+export const saveSemesterRoadmapAPI = async (googleId: string, semester: number, courseIdList: number[]) => {
+    console.log(googleId, semester, courseIdList);
     try {
         const response = await axiosDefault.post('/api/simulator/saveToRoadmap', {
             googleId: googleId,
             semester: semester,
-            courseList: courseList,
+            courseIdList: courseIdList,
         });
         return response.data;
     } catch (error) {

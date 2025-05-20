@@ -1,18 +1,18 @@
 import React from 'react';
 import * as S from '../styled';
-import { CourseDataType } from '../../../../types';
+import { RoadmapCourseDataType } from '../../../../types';
 
-const Course = (courseData : CourseDataType) => {
+const Course = (courseData : RoadmapCourseDataType) => {
 
-  const { name, credit, major, professor, classroom } = courseData;
+  const { courseName, credit, category, yearAndSemester } = courseData;
 
   return (
     <S.Course>
       <S.CourseType>
-        <S.CourseTypeSign major={major} />
+        <S.CourseTypeSign major={category} />
       </S.CourseType>
       <S.CourseTitle>
-        [{credit}] {name}
+        [{credit}] {courseName}
       </S.CourseTitle>
     </S.Course>
   );

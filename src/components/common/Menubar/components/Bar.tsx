@@ -6,6 +6,9 @@ import type { MenuItemType } from "../../../../types";
 import logo from "../../../../assets/Logo.png";
 import axios from "axios";
 import { get } from "http";
+const isElectron = () => {
+	return window.electronAPI !== undefined;
+};
 const Bar = () => {
 	const navigate = useNavigate();
 	const location = useLocation();
@@ -22,9 +25,25 @@ const Bar = () => {
 	];
 	useEffect(() => {
 		const getUsername = async () => {
-			const response = await axios.get("/api/courseList");
+			let user = null;
+			let userInfo = null;
+
+			if (isElectron()) {
+				user = await window.electronAPI.getStoreValue("user");
+				userInfo = await window.electronAPI.getStoreValue("userInfo");
+			} else {
+				const userStr = localStorage.getItem("user");
+				user = userStr ? JSON.parse(userStr) : null;
+			}
+			const serverUrl = import.meta.env.VITE_SERVER_URL;
+			const response = await axios.get(
+				`${serverUrl}/user/info/${user.googleId}`,
+			);
 			setName(response.data.userName);
+			console.log("user", user);
+			console.log("userInfo", userInfo);
 		};
+
 		getUsername();
 	}, []);
 

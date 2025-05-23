@@ -17,8 +17,6 @@ import {
     CourseName,
     TotalCredits,
     SemesterTitle,
-    AddButton,
-    AddButtonContainer,
     DeleteButton,
     ModalOverlay,
     ModalContent,
@@ -27,20 +25,24 @@ import {
     ModalButtons,
     ModalButton,
 } from './components/styled';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getAllSemesterRoadmapAPI } from '../../axios/DashboardApi';
 import { deleteSemesterRoadmapAPI } from '../../axios/RoadmapApi';
 import { userDataRecoil } from '../../atom/UserAtom';
 import { useRecoilValue } from 'recoil';
 import { RoadmapSemesterData, RoadmapCourseDataType } from '../../types';
 import { useNavigate } from 'react-router-dom';
+import AddCourseModal from './components/AddCourseModal';
 
 const Roadmap = () => {
     const [isEditMode, setIsEditMode] = useState(false);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [addCourseModalOpen, setAddCourseModalOpen] = useState(false);
+    const [selectedSemester, setSelectedSemester] = useState<string | null>(null);
     const [semesterToDelete, setSemesterToDelete] = useState<string | null>(null);
     const userData = useRecoilValue(userDataRecoil);
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
 
     const { data: roadmapData = [] } = useQuery<RoadmapSemesterData>({
         queryKey: ['roadmap'],
@@ -91,11 +93,16 @@ const Roadmap = () => {
     const handleDeleteConfirm = async () => {
         if (semesterToDelete) {
             try {
-                await deleteSemesterRoadmapAPI(userData.googleId, semesterToDelete);
+                const semester = calculateSemester(semesterToDelete);
+                console.log('Deleting semester:', semester, 'for semesterKey:', semesterToDelete);
+                const response = await deleteSemesterRoadmapAPI(userData.googleId, semester);
+                console.log('Delete response:', response);
                 setDeleteModalOpen(false);
                 setSemesterToDelete(null);
+                await queryClient.invalidateQueries({ queryKey: ['roadmap'] });
             } catch (error) {
                 console.error('학기 삭제 실패:', error);
+                alert('학기 삭제에 실패했습니다.');
             }
         }
     };
@@ -103,6 +110,16 @@ const Roadmap = () => {
     const handleDeleteCancel = () => {
         setDeleteModalOpen(false);
         setSemesterToDelete(null);
+    };
+
+    const handleAddCourse = (semesterKey: string) => {
+        setSelectedSemester(semesterKey);
+        setAddCourseModalOpen(true);
+    };
+
+    const handleCloseAddCourseModal = () => {
+        setAddCourseModalOpen(false);
+        setSelectedSemester(null);
     };
 
     const totalGridCells = Math.max(8, sortedSemesters.length + 1);
@@ -132,9 +149,55 @@ const Roadmap = () => {
 
                             if (!semesterData) {
                                 return index === sortedSemesters.length ? (
-                                    <AddButtonContainer key="add-button-container">
-                                        <AddButton onClick={handleAddSemester} />
-                                    </AddButtonContainer>
+                                    <div
+                                        key="add-button-container"
+                                        style={{
+                                            width: '212px',
+                                            height: '250px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                        }}
+                                    >
+                                        <button
+                                            onClick={handleAddSemester}
+                                            style={{
+                                                width: '99.48px',
+                                                height: '99.48px',
+                                                backgroundColor: 'rgba(24, 24, 34, 1)',
+                                                border: 'none',
+                                                borderRadius: '50%',
+                                                cursor: 'pointer',
+                                                position: 'relative',
+                                                transition: 'all 0.2s ease',
+                                            }}
+                                        >
+                                            <div
+                                                style={{
+                                                    position: 'absolute',
+                                                    top: '50%',
+                                                    left: '50%',
+                                                    transform: 'translate(-50%, -50%)',
+                                                    width: '39.67px',
+                                                    height: '2px',
+                                                    backgroundColor: 'rgba(108, 108, 114, 1)',
+                                                    borderRadius: '2px',
+                                                }}
+                                            />
+                                            <div
+                                                style={{
+                                                    position: 'absolute',
+                                                    top: '50%',
+                                                    left: '50%',
+                                                    transform: 'translate(-50%, -50%)',
+                                                    width: '2px',
+                                                    height: '39.67px',
+                                                    backgroundColor: 'rgba(108, 108, 114, 1)',
+                                                    borderRadius: '2px',
+                                                }}
+                                            />
+                                        </button>
+                                    </div>
                                 ) : (
                                     <div key={`empty-${index}`} />
                                 );
@@ -156,7 +219,11 @@ const Roadmap = () => {
                                     }}
                                 >
                                     {isEditMode && <DeleteButton onClick={() => handleDeleteClick(semesterKey)} />}
-                                    <SemesterCard isSelected={calculateSemester(semesterKey) === userData.userSemester}>
+                                    <SemesterCard
+                                        isSelected={calculateSemester(semesterKey) === userData.userSemester}
+                                        onClick={() => isEditMode && handleAddCourse(semesterKey)}
+                                        isEditMode={isEditMode}
+                                    >
                                         <CourseList>
                                             {courses.map((course, courseIndex) => (
                                                 <CourseItem
@@ -195,6 +262,14 @@ const Roadmap = () => {
                         </ModalButtons>
                     </ModalContent>
                 </ModalOverlay>
+            )}
+            {addCourseModalOpen && selectedSemester && (
+                <AddCourseModal
+                    isOpen={addCourseModalOpen}
+                    onClose={handleCloseAddCourseModal}
+                    semester={selectedSemester}
+                    semesterNumber={calculateSemester(selectedSemester)}
+                />
             )}
         </Container>
     );

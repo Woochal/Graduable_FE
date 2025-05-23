@@ -49,45 +49,38 @@ const Roadmap = () => {
 
     // 학기 데이터를 정렬하여 표시하기 위한 처리
     const sortedSemesters = roadmapData
-        .map(semesterObj => {
+        .map((semesterObj) => {
             const semesterKey = Object.keys(semesterObj)[0];
             return {
                 key: semesterKey,
-                courses: semesterObj[semesterKey]
+                courses: semesterObj[semesterKey],
             };
         })
         .sort((a, b) => {
             // "2024-1" 형식의 문자열을 비교하여 정렬
             const [yearA, semA] = a.key.split('-').map(Number);
             const [yearB, semB] = b.key.split('-').map(Number);
-            
+
             if (yearA !== yearB) return yearA - yearB;
             return semA - semB;
         });
 
     // 학기 수 계산
     const calculateSemester = (semesterKey: string) => {
-        
         const [year, sem] = semesterKey.split('-').map(Number);
-        console.log(year, sem);
-        console.log(userData.yearOfSemester, userData.semesterInYear, userData.userSemester);
-        console.log(userData.userSemester - ((userData.yearOfSemester - year) * 2) - (userData.semesterInYear - sem));
-        
-        // 파라미터로 받은 학기가 현재 학기보다 이전인 경우
-        // ex) year = 2022, sem = 1, userData.yearOfSemester = 2024, userData.semesterInYear = 2, userData.userSemester = 12 이면 7학기가 나와야함
-        // 12 - ((2024 - 2022) * 2) - (2 - 1) = 7
-        // 파라미터로 받은 학기가 현재 학기보다 이후인 경우
-        // ex) year = 2024, sem = 2, userData.yearOfSemester = 2022, userData.semesterInYear = 1, userData.userSemester = 7 이면 1학기가 나와야함
-        // 7 - ((2022 - 2024) * 2) - (1 - 2) = 1
-        // 파라미터로 받은 학기가 현재 학기와 같은 경우
-        // ex) year = 2024, sem = 2, userData.yearOfSemester = 2024, userData.semesterInYear = 2, userData.userSemester = 12 이면 12학기가 나와야함
-        // 12 - ((2024 - 2024) * 2) - (2 - 2) = 12
-        return userData.userSemester - ((userData.yearOfSemester - year) * 2) - (userData.semesterInYear - sem);
-           
-    }
+        const firstYear = sortedSemesters[0]?.key.split('-')[0];
+        const firstSem = sortedSemesters[0]?.key.split('-')[1];
+
+        if (!firstYear || !firstSem) return 1;
+
+        const yearDiff = Number(year) - Number(firstYear);
+        const semDiff = Number(sem) - Number(firstSem);
+
+        return yearDiff * 2 + semDiff + 1;
+    };
 
     const handleAddSemester = () => {
-       navigate('/simulator');
+        navigate('/simulator');
     };
 
     const handleDeleteClick = (semesterKey: string) => {
@@ -97,7 +90,7 @@ const Roadmap = () => {
 
     const handleDeleteConfirm = async () => {
         if (semesterToDelete) {
-            try{
+            try {
                 await deleteSemesterRoadmapAPI(userData.googleId, semesterToDelete);
                 setDeleteModalOpen(false);
                 setSemesterToDelete(null);
@@ -136,7 +129,7 @@ const Roadmap = () => {
                         .fill(null)
                         .map((_, index) => {
                             const semesterData = sortedSemesters[index];
-                            
+
                             if (!semesterData) {
                                 return index === sortedSemesters.length ? (
                                     <AddButtonContainer key="add-button-container">
@@ -146,12 +139,12 @@ const Roadmap = () => {
                                     <div key={`empty-${index}`} />
                                 );
                             }
-                            
+
                             const { key: semesterKey, courses } = semesterData;
-                            
+
                             // 총 학점 계산
                             const totalCredits = courses.reduce((sum, course) => sum + course.credit, 0);
-                            
+
                             return (
                                 <div
                                     key={semesterKey}
@@ -166,22 +159,22 @@ const Roadmap = () => {
                                     <SemesterCard isSelected={calculateSemester(semesterKey) === userData.userSemester}>
                                         <CourseList>
                                             {courses.map((course, courseIndex) => (
-                                                <CourseItem 
-                                                    key={`${semesterKey}-${course.courseName}-${courseIndex}`} 
-                                                    type={course.category ? "전공" : "교양"}
+                                                <CourseItem
+                                                    key={`${semesterKey}-${course.courseName}-${courseIndex}`}
+                                                    type={course.category ? '전공' : '교양'}
                                                 >
-                                                    <CourseTypeIndicator type={course.category ? "전공" : "교양"} />
+                                                    <CourseTypeIndicator type={course.category ? '전공' : '교양'} />
                                                     <CourseName>
                                                         [{course.credit}] {course.courseName}
                                                     </CourseName>
                                                 </CourseItem>
                                             ))}
                                         </CourseList>
-                                        <TotalCredits>
-                                            총 {totalCredits}학점
-                                        </TotalCredits>
+                                        <TotalCredits>총 {totalCredits}학점</TotalCredits>
                                     </SemesterCard>
-                                    <SemesterTitle>{calculateSemester(semesterKey)}학기({semesterKey.substring(2)})</SemesterTitle>
+                                    <SemesterTitle>
+                                        {calculateSemester(semesterKey)}학기({semesterKey.substring(2)})
+                                    </SemesterTitle>
                                 </div>
                             );
                         })}

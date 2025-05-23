@@ -117,6 +117,7 @@ export const SemesterCard = styled.div<{ isSelected: boolean }>`
     display: flex;
     flex-direction: column;
     border: 1px solid ${(props) => (props.isSelected ? 'rgba(167, 224, 217, 1)' : 'none')};
+    min-height: 250px;
 `;
 
 export const CourseList = styled.div`
@@ -128,7 +129,7 @@ export const CourseList = styled.div`
     gap: 0.5rem;
     width: 100%;
     box-sizing: border-box;
-    min-height: 0;
+    min-height: 180px;
     margin-bottom: 0.5rem;
 `;
 

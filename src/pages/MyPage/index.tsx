@@ -1,3 +1,4 @@
+//src/pages/MyPage/index.tsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
@@ -12,7 +13,7 @@ const Container = styled.div`
   width: 100%;
   height: 100%;
   flex-direction: column;
-  justify-content: center;
+margin-top: 4rem;
 	  margin-left: 2rem;
 `;
 
@@ -156,6 +157,7 @@ export default function MenuBar() {
 				if (isElectron()) {
 					userData = await window.electronAPI.getStoreValue("user");
 					userInfoData = await window.electronAPI.getStoreValue("userInfo");
+					console.log("userData", userInfoData);
 				} else {
 					const stored = localStorage.getItem("user");
 					const storedInfo = localStorage.getItem("userInfo");
@@ -334,7 +336,7 @@ export default function MenuBar() {
 			const serverUrl = import.meta.env.VITE_SERVER_URL;
 			if (serverUrl) {
 				try {
-					await axios.delete(`${serverUrl}/user/delete/${user.googleId}`);
+					await axios.delete(`${serverUrl}/user/${user.googleId}`);
 					console.log("서버에서 계정 삭제 완료");
 				} catch (error) {
 					console.error("서버에서 계정 삭제 실패:", error);
@@ -357,18 +359,108 @@ export default function MenuBar() {
 			navigate("/login");
 		}
 	};
-
-	const handleClearCache = () => {
-		if (isElectron()) {
-			window.electronAPI.removeStoreValue("userInfo");
-		} else {
-			localStorage.removeItem("userInfo");
+	const handleClearCache = async () => {
+		// 확인 팝업 표시
+		if (
+			!window.confirm(
+				"데이터 및 캐시를 초기화하시겠습니까?\n로그인 상태는 유지됩니다.",
+			)
+		) {
+			return;
 		}
-		console.log("데이터 및 캐시 초기화");
-		alert("데이터 및 캐시가 초기화되었습니다.");
-		window.location.reload();
-	};
 
+		try {
+			// 로딩 상태 표시 (필요 시 상태 추가)
+			// setIsLoading(true);
+
+			// 로그인 정보 백업
+			let userData;
+			if (isElectron()) {
+				userData = await window.electronAPI.getStoreValue("user");
+			} else {
+				const stored = localStorage.getItem("user");
+				userData = stored ? JSON.parse(stored) : null;
+			}
+
+			if (!userData || !userData.googleId) {
+				alert("로그인 정보를 찾을 수 없습니다.");
+				navigate("/login");
+				return;
+			}
+
+			// 서버에 캐시 초기화 요청 (필요한 경우)
+			const serverUrl = import.meta.env.VITE_SERVER_URL;
+			if (serverUrl) {
+				try {
+					// 서버 API에 캐시 초기화 요청
+					//안되면 delete로 바꿔야함
+					// 서버에 캐시 초기화 요청 - DELETE 메서드 사용
+					const serverUrl = import.meta.env.VITE_SERVER_URL;
+					if (serverUrl) {
+						try {
+							// 서버 API에 캐시 초기화 요청 (DELETE 메서드)
+							await axios.delete(
+								`${serverUrl}/user/cache/${userData.googleId}`,
+								{
+									headers: {
+										"Content-Type": "application/json",
+									},
+								},
+							);
+							console.log("서버 캐시 초기화 요청 성공");
+						} catch (error) {
+							console.error("서버 캐시 초기화 요청 실패:", error);
+							// 서버 초기화 실패해도 로컬 초기화는 진행
+						}
+					}
+					console.log("서버 캐시 초기화 요청 성공");
+				} catch (error) {
+					console.error("서버 캐시 초기화 요청 실패:", error);
+					// 서버 초기화 실패해도 로컬 초기화는 진행
+				}
+			}
+
+			// 로컬 캐시 데이터 삭제
+			if (isElectron()) {
+				// 사용자 정보 삭제
+				await window.electronAPI.removeStoreValue("userInfo");
+				await window.electronAPI.removeStoreValue(
+					`userInfo_${userData.googleId}`,
+				);
+
+				// 필요한 경우 추가 캐시 삭제
+				await window.electronAPI.removeStoreValue("courseHistory");
+				await window.electronAPI.removeStoreValue("curriculum");
+				await window.electronAPI.removeStoreValue("roadmap");
+				// 기타 필요한 캐시 삭제...
+			} else {
+				// 사용자 정보 삭제
+				localStorage.removeItem("userInfo");
+				localStorage.removeItem(`userInfo_${userData.googleId}`);
+
+				// 필요한 경우 추가 캐시 삭제
+				localStorage.removeItem("courseHistory");
+				localStorage.removeItem("curriculum");
+				localStorage.removeItem("roadmap");
+				// 기타 필요한 캐시 삭제...
+			}
+
+			// 성공 팝업 표시
+			alert(
+				"데이터 및 캐시가 성공적으로 초기화되었습니다. 페이지가 다시 로드됩니다.",
+			);
+			console.log("데이터 및 캐시 초기화 완료");
+
+			// 페이지 리로드 - 서버에서 데이터를 다시 가져오게 됨
+			window.location.reload();
+		} catch (error) {
+			console.error("캐시 초기화 중 오류 발생:", error);
+			alert("캐시 초기화 중 오류가 발생했습니다. 다시 시도해주세요.");
+		} finally {
+			// 로딩 상태 해제 (필요 시)
+			// setIsLoading(false);
+		}
+	};
 	return (
 		<Container>
 			<Section>
@@ -389,7 +481,7 @@ export default function MenuBar() {
 				</Information>
 			</Section>
 
-			<Section>
+			{/* <Section>
 				<SectionTitle>사용자 정보 관리</SectionTitle>
 				<Line />
 				<ArrownandItem>
@@ -398,7 +490,7 @@ export default function MenuBar() {
 						<Arrow>›</Arrow>
 					</MenuItem1>
 				</ArrownandItem>
-			</Section>
+			</Section> */}
 
 			<Section>
 				<SectionTitle>사용자 정보 관리</SectionTitle>

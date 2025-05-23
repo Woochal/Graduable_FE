@@ -1,8 +1,6 @@
 // components/InitialSetup/GraduationInfo.tsx
 import React, { useState } from "react";
 import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
 
 const Container = styled.div`
   width: 100%;
@@ -268,7 +266,7 @@ export default function GraduationInfo({
 						</TextAreaWrapper>
 
 						<ButtonContainer>
-							<Button onClick={handleSkip}>건너뛰기</Button>
+							{/* <Button onClick={handleSkip}>건너뛰기</Button> */}
 							<Button
 								$primary
 								$disabled={!graduationText.trim()}

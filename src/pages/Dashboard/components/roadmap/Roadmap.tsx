@@ -1,7 +1,7 @@
 import React from 'react';
 import * as S from '../styled';
 import RoadmapCourse from './RoadmapCourse';
-import { CourseDataType, RoadmapSemesterData, RoadmapCourseDataType } from '../../../../types';
+import { CourseDataType, RoadmapCourseDataType } from '../../../../types';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getCurrentSemesterRoadmapAPI } from '../../../../axios/DashboardApi';
@@ -11,15 +11,26 @@ import { useRecoilValue } from 'recoil';
 const Roadmap = () => {
   const navigate = useNavigate();
   const userData = useRecoilValue(userDataRecoil);
+  console.log(userData);
 
-  const { data: roadmapSemesterData = [] } = useQuery<RoadmapCourseDataType[]>({
+  // getCurrentSemesterRoadmapAPI는 과목 배열을 직접 반환
+  const { data: apiResponse } = useQuery({
     queryKey: ['roadmap'],
     queryFn: () => getCurrentSemesterRoadmapAPI(userData.googleId),
   });
 
-  console.log(roadmapSemesterData);
+  // 데이터 형식 디버깅
+  console.log('API Response:', apiResponse);
+  
+  // 데이터가 배열인지 확인하고 안전하게 처리
+  const roadmapCourses: RoadmapCourseDataType[] = Array.isArray(apiResponse) 
+    ? apiResponse 
+    : [];
 
-  const totalCredit = roadmapSemesterData.reduce((acc: number, course: RoadmapCourseDataType) => acc + course.credit, 0);
+  // 과목들의 학점 총합 계산 (안전하게 처리)
+  const totalCredit = Array.isArray(roadmapCourses) 
+    ? roadmapCourses.reduce((acc: number, course: RoadmapCourseDataType) => acc + (course.credit || 0), 0)
+    : 0;
 
   // const roadmapCourseData : CourseDataType[] = [
   //   {
@@ -32,7 +43,7 @@ const Roadmap = () => {
   //     credit: 2,
   //     major: true,
   //   },
-  //   {
+  //   { 
   //     name: '이공계 글쓰기',
   //     credit: 3,
   //     major: false,
@@ -71,6 +82,11 @@ const Roadmap = () => {
   //   courses: roadmapCourseData,
   // };
 
+  // 현재 학기 정보 추출 (첫 번째 과목의 yearAndSemester 사용)
+  const currentSemesterInfo = roadmapCourses.length > 0 && roadmapCourses[0]?.yearAndSemester 
+    ? roadmapCourses[0].yearAndSemester 
+    : '';
+  
   return (
     <S.RoadmapContainer>
 
@@ -87,7 +103,7 @@ const Roadmap = () => {
 
       <S.RoadmapContent>
 
-        <RoadmapCourse courseData={roadmapSemesterData} />
+        <RoadmapCourse courseData={roadmapCourses} />
 
         <S.CourseInformation>
           
@@ -107,7 +123,9 @@ const Roadmap = () => {
         </S.CourseInformation>
 
         <S.RoadmapSemester>
-          {userData.userSemester}학기 ({roadmapSemesterData[0]?.yearAndSemester?.substring(0, 4)}년 {roadmapSemesterData[0]?.yearAndSemester?.substring(4, 6)}학기)
+          {userData.userSemester}학기 ({currentSemesterInfo 
+            ? `${currentSemesterInfo.substring(0, 4)}년 ${currentSemesterInfo.substring(5)}학기` 
+            : ''})
         </S.RoadmapSemester>
 
       </S.RoadmapContent>

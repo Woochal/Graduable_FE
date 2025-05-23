@@ -7,13 +7,13 @@ const { persistAtom } = recoilPersist()
 export const userDataRecoil = atom({
     key: "userDataRecoil",
     default: {
-        userName: "박주영2",
-        userNickname: "Woochal2",
-        userSemester: 11,
-        googleId: "testBySwagger2",
-        email: "private.com",
-        yearOfSemester: 2025,
-        semesterInYear: 1
+        userName: "",
+        userNickname: "",
+        userSemester: 0,
+        googleId: "",
+        email: "",
+        yearOfSemester: 0,
+        semesterInYear: 0
     },
     effects_UNSTABLE: [persistAtom],
   });

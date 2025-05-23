@@ -1,6 +1,7 @@
 import {axiosDefault, handleError} from './DefaultApi.js'
 
 export const getCurrentSemesterRoadmapAPI = async (uid: string) => {
+    console.log(uid);
 
     try {
         const response = await axiosDefault.get(`/road-map/now/${uid}`);
@@ -12,6 +13,7 @@ export const getCurrentSemesterRoadmapAPI = async (uid: string) => {
 };
 
 export const getAllSemesterRoadmapAPI = async (uid: string) => {
+    console.log(uid);
     try {
         const response = await axiosDefault.get(`/road-map/${uid}`);
         console.log(response.data);

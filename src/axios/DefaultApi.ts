@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // 공통 axios 인스턴스 생성
 export const axiosDefault = axios.create({
-    baseURL: import.meta.env.VITE_APP_API_URL,
+    baseURL: import.meta.env.VITE_SERVER_URL,
     headers: {
         'Content-Type': 'application/json',
     }

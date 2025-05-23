@@ -136,9 +136,9 @@ export default function CourseHistory() {
 				try {
 					const googleId = userData.googleId; // 실제 구글 ID로 대체해야 합니다
 					console.log("API 응답:", googleId);
-					console.log("API 응답:", `https://port-0-graduable2-maf90lxef3d859f7.sel4.cloudtype.app/grade/${googleId}`);
+					console.log("API 응답:", `${import.meta.env.VITE_SERVER_URL}/grade/${googleId}`);
 					const response = await axios.get(
-						`https://port-0-graduable2-maf90lxef3d859f7.sel4.cloudtype.app/grade/${googleId}`,
+						`${import.meta.env.VITE_SERVER_URL}/grade/${googleId}`,
 						{
 							headers: {
 								Accept: "application/json",

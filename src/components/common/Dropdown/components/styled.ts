@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import type { MenuItemActiveType } from "../../../../types";
 
-export const Container = styled.div<{ width: string, height: string }>`
+export const Container = styled.div<{ width: string; height: string }>`
   width: ${(props) => props.width};
   height: ${(props) => props.height};
   position: relative;
@@ -15,8 +15,8 @@ export const Container = styled.div<{ width: string, height: string }>`
   /* border: 1px solid ${(props) => props.theme.color.borderDefault}; */
 `;
 
-export const DropdownList = styled.div<{width: string, visible: boolean}>`
-  display: ${(props) => props.visible ? 'flex' : 'none'};
+export const DropdownList = styled.div<{ width: string; visible: boolean }>`
+  display: ${(props) => (props.visible ? "flex" : "none")};
   width: ${(props) => props.width};
   height: auto;
   max-height: 15.625vw;
@@ -32,7 +32,7 @@ export const DropdownList = styled.div<{width: string, visible: boolean}>`
   border: 1px solid ${(props) => props.theme.color.textSub};
 `;
 
-export const DropdownItem = styled.div<{isSelected: boolean}>`
+export const DropdownItem = styled.div<{ isSelected: boolean }>`
   width: 100%;
   min-height: 2.344vw;
   align-items: center;
@@ -40,14 +40,12 @@ export const DropdownItem = styled.div<{isSelected: boolean}>`
   font-size: ${(props) => props.theme.typography.caption.fontSize};
   font-weight: ${(props) => props.theme.typography.contentBold.fontWeight};
   color: ${(props) => props.theme.color.textPrimary};
-  background-color: ${(props) => props.isSelected ? props.theme.color.bgCard : props.theme.color.bgDefault};
+  background-color: ${(props) => (props.isSelected ? props.theme.color.bgCard : props.theme.color.bgDefault)};
   border-bottom: 1px solid ${(props) => props.theme.color.borderDefault};
   &:hover {
     background-color: ${(props) => props.theme.color.bgCard};
   }
 `;
-
-
 
 export const SelectedItem = styled.div`
   width: 100%;
@@ -65,7 +63,7 @@ export const Placeholder = styled.div`
   color: ${(props) => props.theme.color.textSub};
 `;
 
-export const DropdownIcon = styled.div<{isOpen: boolean}>`
+export const DropdownIcon = styled.div<{ isOpen: boolean }>`
   width: 2.188vw;
   height: 100%;
   display: flex;
@@ -73,13 +71,11 @@ export const DropdownIcon = styled.div<{isOpen: boolean}>`
   align-items: center;
  
   img {
-    transform: ${(props) => props.isOpen ? 'rotate(0deg)' : 'rotate(180deg)'};
+    transform: ${(props) => (props.isOpen ? "rotate(0deg)" : "rotate(180deg)")};
     transform-origin: center center;
     transition: transform 0.3s ease;
   }
 `;
-
-
 
 export const Item = styled.div<MenuItemActiveType>`
   width: 100%;

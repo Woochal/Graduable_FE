@@ -93,6 +93,16 @@ export default function InitialSetupFlow({
 			await sendGraduationText(text);
 		}
 		completeSetup();
+		/*
+			try {
+		if (text) {
+			await sendGraduationText(text);
+		}
+		completeSetup();
+	} catch (error) {
+		// 에러를 다시 throw하여 GraduationInfo에서 처리할 수 있도록 함
+		throw error;
+	} */
 	};
 
 	// 졸업심사 텍스트만 서버에 전송하는 함수
@@ -123,7 +133,38 @@ export default function InitialSetupFlow({
 			console.error("졸업심사 정보 전송 실패:", error);
 		}
 	};
+	/*
+// 졸업심사 텍스트만 서버에 전송하는 함수
+const sendGraduationText = async (graduationText: string) => {
+	let currentUser;
+	if (isElectron()) {
+		currentUser = await window.electronAPI.getStoreValue("user");
+	} else {
+		currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+	}
 
+	try {
+		const serverUrl = import.meta.env.VITE_SERVER_URL;
+		if (serverUrl && graduationText.trim()) {
+			await axios.post(
+				`${serverUrl}/grade/${currentUser.googleId}`,
+				graduationText,
+				{
+					headers: {
+						"Content-Type": "text/plain",
+					},
+				},
+			);
+			console.log("서버에 졸업심사 정보 저장 완료");
+			console.log("전송된 졸업심사 정보:", currentUser.googleId);
+		}
+	} catch (error) {
+		console.error("졸업심사 정보 전송 실패:", error);
+		// 에러를 다시 throw하여 상위에서 처리할 수 있도록 함
+		throw error;
+	}
+};
+*/
 	// 설정 완료 및 로컬 저장 처리
 	const completeSetup = async () => {
 		let currentUser;

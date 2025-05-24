@@ -11,6 +11,8 @@ const SimulationFilter = () => {
   const userData = useRecoilValue(userDataRecoil);
   const [semesterList, setSemesterList] = useState<Semester[]>([]);
 
+  console.log(userData);
+
   useEffect(() => {
     const newSemesterList: Semester[] = [];
     for(let i = 1; i <= userData.userSemester; i++) {

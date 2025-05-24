@@ -10,13 +10,13 @@ import {
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
 import { useTheme } from "styled-components";
+import { useState, useEffect } from "react";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement);
 
 const CreditBar = ({ categoryData }: { categoryData: CategoryDataType }) => {
 	const theme = useTheme();
-
-	const { credit, maxCredit, isFinished, name } = categoryData;
+	
 
 	const options: ChartOptions<"bar"> = {
 		responsive: true,
@@ -30,7 +30,7 @@ const CreditBar = ({ categoryData }: { categoryData: CategoryDataType }) => {
 			// tooltip: {
 			//   callbacks: {
 			//     title: () => '남은 학점', // 제목 비우기
-			//     label: () => `${maxCredit - credit} 학점`,
+			//     label: () => `${maxCredit - attendedCredit} 학점`,
 			//   },
 			//   displayColors: false, // 색상 박스 숨기기
 			// },
@@ -49,11 +49,11 @@ const CreditBar = ({ categoryData }: { categoryData: CategoryDataType }) => {
 	};
 
 	const data = {
-		labels: [name],
+		labels: [categoryData?.name],
 		datasets: [
 			{
-				data: [credit / maxCredit],
-				backgroundColor: `${isFinished ? theme.color.primary : theme.color.highlightGray}`,
+				data: [categoryData?.attendedCredit / categoryData?.maxCredit],
+				backgroundColor: `${categoryData?.isFinished ? theme.color.primary : theme.color.highlightGray}`,
 				barThickness: 1000,
 			},
 		],

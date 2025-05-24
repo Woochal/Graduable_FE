@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getFilteredSimulationResultAPI } from "../../axios/SimulatorApi";
 import { userDataRecoil } from "../../atom/UserAtom";
 import { useRecoilValue } from "recoil";
-import { RoadmapDataType } from "../../types/simulator/simulator";
+import { RoadmapDataType, CategoryDataType } from "../../types/simulator/simulator";
 
 
 const DashboardPage = () => {
@@ -22,7 +22,7 @@ const DashboardPage = () => {
 		}
 	}, [userData.userSemester]);
 
-	const { data: simulationResultData = {
+	const { data: simulationResultDashBoardData = {
 		categoryData: [
 			{
 			id: 1,
@@ -86,7 +86,7 @@ const DashboardPage = () => {
 		attendedCreditPercent: 0,
 		leftCreditPercent: 0,
 	  } } = useQuery<RoadmapDataType>({
-		queryKey: ['simulationResultData', semesterList],
+		queryKey: ['simulationResultDashBoardData', semesterList], // 시뮬레이터에서 현 학기 정보로 시작하고 싶으면 이름 통일?
 		queryFn: () => getFilteredSimulationResultAPI(userData.googleId, semesterList),
 		enabled: userData.googleId !== null,
 	  });
@@ -96,13 +96,13 @@ const DashboardPage = () => {
 			<S.UpperContainer>
 				<Roadmap />
 				<RemainingCredit simulationResultData={{
-					totalCredit: simulationResultData.totalCredit,
-					attendedCredit: simulationResultData.attendedCredit,
-					attendedCreditPercent: simulationResultData.attendedCreditPercent,
-					leftCreditPercent: simulationResultData.leftCreditPercent,
+					totalCredit: simulationResultDashBoardData.totalCredit,
+					attendedCredit: simulationResultDashBoardData.attendedCredit,
+					attendedCreditPercent: simulationResultDashBoardData.attendedCreditPercent,
+					leftCreditPercent: simulationResultDashBoardData.leftCreditPercent,
 				}} />
 			</S.UpperContainer>
-			<CourseHistory categoryData={simulationResultData.categoryData} />
+			<CourseHistory categoryData={simulationResultDashBoardData.categoryData as CategoryDataType[]} />
 		</S.Container>
 	);
 }

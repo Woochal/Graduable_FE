@@ -47,7 +47,7 @@ const isElectron = () => {
 
 export default function GoogleLogin() {
 	const [isLoading, setIsLoading] = useState(false);
-	const [userData, setUserData] = useRecoilState(userDataRecoil);
+	const [userData, setUserDataR] = useRecoilState(userDataRecoil);
 	const navigate = useNavigate();
 	const location = useLocation();
 
@@ -160,6 +160,7 @@ export default function GoogleLogin() {
 				throw new Error("Required user information is missing");
 			}
 
+
 			const userData = {
 				googleId: userInfo.id.toString(),
 				email: userInfo.kakao_account.email,
@@ -186,7 +187,6 @@ export default function GoogleLogin() {
 				// Electron 환경에서는 electron-store 사용
 				console.log("Saving user info to electron-store");
 				await window.electronAPI.setStoreValue("user", userData);
-				setUserData(userData);
 
 				// 저장 후 바로 확인
 				const savedUser = await window.electronAPI.getStoreValue("user");
@@ -226,6 +226,8 @@ export default function GoogleLogin() {
 									`userInfo_${userData.googleId}`,
 									response.data,
 								);
+
+
 
 								// 저장 후 확인
 								const savedUserInfo = await window.electronAPI.getStoreValue(
@@ -290,6 +292,9 @@ export default function GoogleLogin() {
 					}
 				}
 			}
+			const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/user/info/${userData.googleId}`);
+			console.log(response.data);
+			setUserDataR(response.data);
 		} catch (error) {
 			console.error("Login process failed:", error);
 			alert("로그인에 실패했습니다. 다시 시도해주세요.");

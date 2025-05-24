@@ -25,6 +25,8 @@ const SimulationResult = () => {
     enabled: userData.googleId !== null && selectedSemester.length > 0,
   });
 
+  console.log(simulationResultData);
+
   // const simulationResultData: RoadmapDataType = {
   //   categoryData: [
   //     {
@@ -99,7 +101,7 @@ const SimulationResult = () => {
         <S.DonutInfoDiv>{simulationResultData?.attendedCredit} / {simulationResultData?.totalCredit} <S.DonutInfoSpan>&nbsp;(전체 학점 기준)</S.DonutInfoSpan></S.DonutInfoDiv>
       </S.SimulationResultDonutDiv>
       <S.SimulationResultCreditBarDiv>
-        <CourseHistory categoryData={simulationResultData.categoryData} />
+        <CourseHistory categoryData={simulationResultData?.categoryData} />
       </S.SimulationResultCreditBarDiv>
       
     </S.SimulationResultContainer>

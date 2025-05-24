@@ -94,7 +94,7 @@ const AuthAndSetupCheck = ({ children }: { children: React.ReactNode }) => {
 									response.data,
 								);
 								userInfo = response.data;
-                                setUserData(userData)
+                                setUserData(response.data)
 								serverUserExists = true;
 
 								// 서버 데이터를 로컬에 저장 (덮어쓰기)

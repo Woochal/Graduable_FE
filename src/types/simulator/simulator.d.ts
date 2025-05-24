@@ -24,7 +24,7 @@ export interface CategoryDataType {
     id: number;
     name: string;
     maxCredit: number;
-    credit: number;
+    attendedCredit: number;
     isFinished: boolean;
 }
 

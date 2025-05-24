@@ -16,7 +16,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement);
 const CreditBar = ({ categoryData }: { categoryData: CategoryHistoryType }) => {
 	const theme = useTheme();
 
-	const { credit, maxCredit, isFinished, name } = categoryData;
+	const { attendedCredit, maxCredit, isFinished, name } = categoryData;
 
 	const options: ChartOptions<"bar"> = {
 		responsive: true,
@@ -52,7 +52,7 @@ const CreditBar = ({ categoryData }: { categoryData: CategoryHistoryType }) => {
 		labels: [name],
 		datasets: [
 			{
-				data: [credit / maxCredit],
+				data: [attendedCredit / maxCredit],
 				backgroundColor: `${isFinished ? theme.color.primary : theme.color.highlightGray}`,
 				barThickness: 1000,
 			},

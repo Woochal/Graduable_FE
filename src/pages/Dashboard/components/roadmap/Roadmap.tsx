@@ -11,7 +11,6 @@ import { useRecoilValue } from 'recoil';
 const Roadmap = () => {
   const navigate = useNavigate();
   const userData = useRecoilValue(userDataRecoil);
-  console.log(userData);
 
   // getCurrentSemesterRoadmapAPI는 과목 배열을 직접 반환
   const { data: apiResponse } = useQuery({
@@ -28,65 +27,8 @@ const Roadmap = () => {
     : [];
 
   // 과목들의 학점 총합 계산 (안전하게 처리)
-  const totalCredit = Array.isArray(roadmapCourses) 
-    ? roadmapCourses.reduce((acc: number, course: RoadmapCourseDataType) => acc + (course.credit || 0), 0)
-    : 0;
+  const totalCredit = roadmapCourses.reduce((acc: number, course: RoadmapCourseDataType) => acc + (course.credit || 0), 0);
 
-  // const roadmapCourseData : CourseDataType[] = [
-  //   {
-  //     name: '모바일 앱 개발',
-  //     credit: 3,
-  //     major: true,
-  //   },
-  //   {
-  //     name: '문제해결 스튜디오',
-  //     credit: 2,
-  //     major: true,
-  //   },
-  //   { 
-  //     name: '이공계 글쓰기',
-  //     credit: 3,
-  //     major: false,
-  //   },
-  //   {
-  //     name: '컴퓨터 네트워크',
-  //     credit: 3,
-  //     major: true,
-  //   },
-  //   {
-  //     name: '한국사(근현대사)',
-  //     credit: 3,
-  //     major: false,
-  //   },
-  //   {
-  //     name: '캡스톤디자인1',
-  //     credit: 2,
-  //     major: true,
-  //   },
-  //   {
-  //     name: '스크롤도 가능하다',
-  //     credit: 3,
-  //     major: true,
-  //   },
-  //   {
-  //     name: '캬캬캬캬캬',
-  //     credit: 2,
-  //     major: true,
-  //   },
-  // ];
-
-  // const roadmapSemesterData : RoadmapSemesterData = {
-  //   year: 2024,
-  //   semester: 2,
-  //   semesterN: 12,
-  //   courses: roadmapCourseData,
-  // };
-
-  // 현재 학기 정보 추출 (첫 번째 과목의 yearAndSemester 사용)
-  const currentSemesterInfo = roadmapCourses.length > 0 && roadmapCourses[0]?.yearAndSemester 
-    ? roadmapCourses[0].yearAndSemester 
-    : '';
-  
   return (
     <S.RoadmapContainer>
 
@@ -123,9 +65,7 @@ const Roadmap = () => {
         </S.CourseInformation>
 
         <S.RoadmapSemester>
-          {userData.userSemester}학기 ({currentSemesterInfo 
-            ? `${currentSemesterInfo.substring(0, 4)}년 ${currentSemesterInfo.substring(5)}학기` 
-            : ''})
+          {userData.userSemester}학기 ({userData.yearOfSemester}년 {userData.semesterInYear}학기)
         </S.RoadmapSemester>
 
       </S.RoadmapContent>

@@ -10,7 +10,7 @@ const CategoryHistory = ({ categoryData }: { categoryData: CategoryHistoryType }
     <S.CategoryHistoryContainer>
       <S.CategoryTop isFinished={categoryData.isFinished}>
         <S.CategoryTopText isFinished={categoryData.isFinished}>
-          {categoryData.isFinished ? "완료" : `${categoryData.credit} / ${categoryData.maxCredit}` }
+          {categoryData.isFinished ? "완료" : `${categoryData.attendedCredit} / ${categoryData.maxCredit}` }
         </S.CategoryTopText>
         <S.CreditBar>
           <CreditBar categoryData={categoryData} />

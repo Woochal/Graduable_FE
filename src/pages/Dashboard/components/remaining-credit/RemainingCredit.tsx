@@ -27,7 +27,7 @@ const RemainingCredit = ({ simulationResultData }: { simulationResultData: Remai
         <S.RemainingCreditContentRight>
           <CreditDonut {...simulationResultData} />
           <S.RemainingCreditDetailPercent>
-            졸업까지 {simulationResultData.leftCreditPercent}% 남았어요.
+            졸업까지 {simulationResultData.leftCreditPercent.toFixed(0)}% 남았어요.
           </S.RemainingCreditDetailPercent>
         </S.RemainingCreditContentRight>
       </S.RemainingCreditContent>

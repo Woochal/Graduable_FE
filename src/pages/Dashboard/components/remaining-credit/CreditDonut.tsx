@@ -65,7 +65,7 @@ const CreditDonut = ( creditData: RemainingCreditType ) => {
       </S.CreditDonut>
       <S.CreditDonutText>
         <Spacer size={10} axis="horizontal" />
-        {attendedCreditPercent}%
+        {attendedCreditPercent.toFixed(0)}%
       </S.CreditDonutText>
     </S.CreditDonutContainer>
   );

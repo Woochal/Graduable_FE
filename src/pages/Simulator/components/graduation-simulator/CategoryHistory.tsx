@@ -5,18 +5,20 @@ import CreditBar from './CreditBar';
 
 const CategoryHistory = ({ categoryData }: { categoryData: CategoryHistoryType }) => {
 
+  // console.log(categoryData);
+
   return (
     <S.CategoryHistoryContainer>
-      <S.CategoryTop isFinished={categoryData.isFinished}>
-        <S.CategoryTopText isFinished={categoryData.isFinished}>
-          {categoryData.credit} / {categoryData.maxCredit}
+      <S.CategoryTop isFinished={categoryData?.isFinished}>
+        <S.CategoryTopText isFinished={categoryData?.isFinished}>
+          {categoryData?.attendedCredit === 0 ? "0" : `${categoryData?.attendedCredit}`} / {categoryData?.maxCredit}
         </S.CategoryTopText>
-        <S.CreditBar isFinished={categoryData.isFinished}>
+        <S.CreditBar isFinished={categoryData?.isFinished}>
           <CreditBar categoryData={categoryData} />
         </S.CreditBar>
       </S.CategoryTop>
      
-      <S.CategoryBottom isFinished={categoryData.isFinished}>{categoryData.name }</S.CategoryBottom>
+      <S.CategoryBottom isFinished={categoryData?.isFinished}>{categoryData?.name }</S.CategoryBottom>
     </S.CategoryHistoryContainer>
   );
 };

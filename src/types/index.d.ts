@@ -12,7 +12,7 @@ export interface MenuItemType {
 export interface CategoryHistoryType {
     id: number;
     name: string;
-    credit: number;
+    attendedCredit: number;
     maxCredit: number;
     isFinished: boolean;
 }

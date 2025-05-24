@@ -4,7 +4,7 @@ import { RoadmapCourseDataType } from '../../../../types';
 
 const Course = (courseData : RoadmapCourseDataType) => {
 
-  const { courseName, credit, category, yearAndSemester } = courseData;
+  const { courseName, credit, category, semester } = courseData;
 
   return (
     <S.Course>

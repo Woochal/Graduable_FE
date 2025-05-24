@@ -44,5 +44,6 @@ export interface RoadmapCourseDataType {
     courseName: string;
     credit: number;
     category: boolean; // 전공 여부
-    yearAndSemester: string; // 2024-1
+    semester: number; // 학기
+    courseID: number; 
 }

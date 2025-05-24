@@ -8,7 +8,7 @@ const CourseHandbook = () => {
                 <Title>현 학기 (25-1) 수강편람 확인하기</Title>
                 <PDFContainer>
                     <embed
-                        src="/coursehandbook.pdf#toolbar=0&navpanes=0"
+                        src="https://port-0-graduable2-maf90lxef3d859f7.sel4.cloudtype.app/view-pdf"
                         type="application/pdf"
                         width="100%"
                         height="100%"

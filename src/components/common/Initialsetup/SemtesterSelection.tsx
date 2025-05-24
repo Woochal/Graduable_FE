@@ -15,7 +15,7 @@ display: flex;
 flex-direction: column;
 border-radius: 15px;
 width: 57.2297vw;
-height: 34.1258vw;
+height: 32.1258vw;
 background: ${(props) => props.theme.color.bgCard};
   `;
 

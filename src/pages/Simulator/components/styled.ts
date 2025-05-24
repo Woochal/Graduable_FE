@@ -15,9 +15,10 @@ export const Container = styled.div`
 
 export const AddSemesterContainer = styled.div`
   width: 76.875vw;
-  height: 29.688vw;
+  /* height: 29.688vw; */
+  height: 24.219vw;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: end;
   align-items: center;
   /* border: 1px solid red; */
 `;

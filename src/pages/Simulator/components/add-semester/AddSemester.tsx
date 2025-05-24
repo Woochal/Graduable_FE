@@ -86,7 +86,7 @@ const AddSemester = () => {
 
   return (
     <S.AddSemesterContainer>
-      <SemesterFilter selectedFilter={selectedFilter} setSelectedFilter={setSelectedFilter} />
+      {/* <SemesterFilter selectedFilter={selectedFilter} setSelectedFilter={setSelectedFilter} /> */}
       <S.AddSemesterContent>
         <S.AddSemesterContentLeft>
           <CourseSearch searchText={searchText} setSearchText={setSearchText} />

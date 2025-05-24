@@ -6,8 +6,6 @@ import { useState, useEffect } from 'react';
 
 const CourseHistory = ({categoryData}: {categoryData: CategoryDataType[]}) => {
 
-  console.log(categoryData);
-
   // 초기 데이터 상태
   const initialData: CategoryDataType[] = [
     {

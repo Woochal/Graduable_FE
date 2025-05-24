@@ -17,7 +17,7 @@ const DashboardPage = () => {
 	const semesterList: number[] = [];
 	
 	useEffect(() => {
-		for(let i = 1; i <= userData.userSemester; i++) {
+		for(let i = 1; i < userData.userSemester; i++) {
 			semesterList.push(i);
 		}
 	}, [userData.userSemester]);

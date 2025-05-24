@@ -26,6 +26,15 @@ const Section = styled.div`
   height: 11.2828vw;
   margin-bottom: 1.5vw;
 `;
+const Section1 = styled.div`
+  display: flex;
+  flex-direction: column;
+  background-color: ${(props) => props.theme.color.bgCard};
+  width: 76.9133vw;
+  border-radius: 15px;
+  height: 13.2828vw;
+  margin-bottom: 1.5vw;
+`;
 
 const SectionTitle = styled.div`
   color: #fff;
@@ -51,7 +60,11 @@ const Information = styled.div`
 const OpenModalButton = styled.button`
 border: none;
  width: 20vw;
-  height: 1.8vw;
+ margin-top: -0.5vw;
+ padding-top: 0.5vw;
+  padding-bottom: 0.5vw;
+  height: 2.5vw;
+  border-radius: 5px;
   text-align: center;
   background: ${(props) => props.theme.color.bgDefault};
   color: #fff;
@@ -492,7 +505,7 @@ export default function MenuBar() {
 				</ArrownandItem>
 			</Section> */}
 
-			<Section>
+			<Section1>
 				<SectionTitle>사용자 정보 관리</SectionTitle>
 				<Line />
 				<ArrownandItem>
@@ -507,9 +520,9 @@ export default function MenuBar() {
 						<Arrow>›</Arrow>
 					</MenuItem2>
 				</ArrownandItem>
-			</Section>
+			</Section1>
 
-			<Section>
+			<Section1>
 				<SectionTitle>계정 관리</SectionTitle>
 				<Line />
 				<ArrownandItem>
@@ -524,7 +537,7 @@ export default function MenuBar() {
 						<Arrow>›</Arrow>
 					</MenuItem3>
 				</ArrownandItem>
-			</Section>
+			</Section1>
 
 			{/* 학기 수정 모달 */}
 			<SemesterModal

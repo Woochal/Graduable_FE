@@ -25,6 +25,7 @@ const Container = styled.div`
   flex-direction: column;
   justify-content: center;
   margin-left: 2rem;
+  /* border: 1px solid red; */
 `;
 
 const FilterWrapper = styled.div`
@@ -32,6 +33,8 @@ const FilterWrapper = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  /* border: 1px solid red; */
+
 `;
 
 // 설계학점 추출 함수

@@ -10,8 +10,10 @@ import disvector from "../../../assets/Vectornotactive.png";
 const FilterContainer = styled.div`
   display: flex;
   gap: 0.5rem;
-  padding: 1rem 0;
   align-items: center;
+  margin-top: 0.938vw;
+  margin-bottom: 0.938vw;
+  /* border: 1px solid red; */
 `;
 
 const FilterButton = styled.button<{ $isActive: boolean }>`

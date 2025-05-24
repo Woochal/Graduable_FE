@@ -3,15 +3,16 @@ import { motion } from "framer-motion";
 
 // CourseList.tsx에서 사용
 export const Containers = styled.div`
-  margin-top: 2.5vw;
   display: flex;
   background-color: ${(props) => props.theme.color.bgCard};
   flex-direction: column;
-  height: 25.6992vw;
+  height: 25.625vw;
   width: 76.9133vw;
   border-radius: 15px;
   overflow-y: auto;
   padding: 10px;
+  margin-top: 1.406vw;
+  /* border: 1px solid red; */
 `;
 
 export const TableContainer = styled.div`
@@ -68,11 +69,15 @@ export const Container = styled.div`
 
 export const SectionGrid = styled.div`
   width: 76.9133vw;
-  height: 28.6367vw;
+  height: 25.781vw;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0.938vw 1.875vw;
   border-radius: 15px;
   background-color: ${(props) => props.theme.color.bgCard};
+  /* border: 1px solid red; */
 `;
 export const Sugangtitle = styled.div`
 width: auto;
@@ -95,12 +100,11 @@ interface SectionAllBoxProps {
 
 export const SectionAllBox = styled.div<SectionAllBoxProps>`
 
-  width: auto;
-  margin-top: 1.25vw;
-  margin-left: 1.25vw;
+  width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
+  /* border: 1px solid red; */
 
   opacity: ${(props) => (props.selected ? 1 : 0.6)}; // 선택되지 않은 항목은 불투명도 낮춤
 `;
@@ -153,11 +157,11 @@ export const PerfecSectionInfo = styled.div`
 export const ProgressContainer = styled.div`
 
   width: 2.0141vw;
-  height: 11.4859vw;
+  height: 11.563vw;
   background-color: #333;
   border-radius: 6px;
   position: relative;
-   margin-top: 1vw;
+   /* margin-top: 1vw; */
 `;
 
 export const ProgressFill = styled(motion.div)<{

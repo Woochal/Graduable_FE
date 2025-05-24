@@ -54,9 +54,10 @@ const getDisplaySectionName = (sectionName: string): string => {
 	) {
 		return sectionName; // 원래 이름 유지 (섹션 표시에서는 원래 이름 사용)
 	}
+	console.log(sectionName);
 	// 전공 관련 분류
-	if (["전공주제(AI컴퓨터심화)", "BSM"].includes(sectionName)) {
-		return sectionName; // 원래 이름 유지 (섹션 표시에서는 원래 이름 사용)
+	if (sectionName.includes("전공주제")) {
+		return "전공주제"; // 원래 이름 유지 (섹션 표시에서는 원래 이름 사용)
 	}
 	// 그 외의 경우 원래 분류명 반환
 	return sectionName;
@@ -78,11 +79,12 @@ const VerticalProgressBar = ({ progress, color }: VerticalProgressBarProps) => {
 	);
 };
 
-const Explan = styled.div`
+const Explain = styled.div`
   font-size: ${(props) => props.theme.typography.subTitle.fontSize};
   font-weight: ${(props) => props.theme.typography.subTitle.fontWeight};
   color: ${(props) => props.theme.color.textSub};
-  margin-left: 1.7vw;
+  margin-top: 0.281vw;
+  /* border: 1px solid red; */
 `;
 
 export default function CourseSection({
@@ -121,8 +123,15 @@ export default function CourseSection({
 				<div>데이터를 불러오는 중입니다...</div>
 			) : (
 				<SectionAllBox selected={!!selectedSections}>
-					<Explan>상단의 텍스트는 [잔여학점 / 전체학점] 을 나타냅니다.</Explan>
-					<div style={{ display: "flex", marginTop: "2.5vw" }}>
+					<Explain>상단의 텍스트는 [잔여학점 / 전체학점] 을 나타냅니다.</Explain>
+                    <div style={{ 
+						display: "flex", 
+						justifyContent: "center", 
+						alignItems: "center", 
+						marginTop: "1.25vw", 
+						gap: "1.294vw", 
+						// border: "1px solid red",
+						}}>
 						{sectionList.map((sectionItem) => {
 							const progress = findSectionProgress(sectionItem.section);
 							const progressColor = getProgressColor(
@@ -132,9 +141,9 @@ export default function CourseSection({
 								<div
 									style={{
 										display: "flex",
+										height: "20.938vw",
 										flexDirection: "column",
 										alignItems: "center",
-										marginLeft: "1.25vw",
 									}}
 									key={sectionItem.section}
 								>
@@ -146,7 +155,7 @@ export default function CourseSection({
 											<PerfecSectionInfo>완료</PerfecSectionInfo>
 										) : (
 											<SectionInfo>
-												{progress.remainingCredits}/{progress.totalCredits}
+												{progress.completedCredits}/{progress.totalCredits}
 											</SectionInfo>
 										)}
 
@@ -157,7 +166,9 @@ export default function CourseSection({
 												flexDirection: "column",
 												height: "100%",
 												alignItems: "center", // 가로 중앙 정렬
+												justifyContent: "end",
 												width: "100%", // 전체 너비 사용
+												// border: "1px solid red",
 											}}
 										>
 											<VerticalProgressBar

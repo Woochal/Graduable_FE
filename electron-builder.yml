@@ -14,7 +14,7 @@ files:
 
 extraFiles:
     - from: src/assets
-      to: dist
+      to: resources/assets
       filter:
           - '**/*.pdf'
           - '**/*.html'

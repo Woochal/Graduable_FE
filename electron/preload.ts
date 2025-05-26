@@ -17,6 +17,12 @@ interface ElectronAPI {
         chrome: () => string;
         electron: () => string;
     };
+
+    // Electron 환경 확인
+    isElectron: boolean;
+
+    // 앱의 실제 경로
+    getAppPath: () => Promise<string>;
 }
 
 // API 정의
@@ -38,6 +44,12 @@ const api: ElectronAPI = {
         chrome: () => process.versions.chrome,
         electron: () => process.versions.electron,
     },
+
+    // Electron 환경 확인
+    isElectron: true,
+
+    // 앱의 실제 경로
+    getAppPath: () => ipcRenderer.invoke('get-app-path'),
 };
 
 // API 노출

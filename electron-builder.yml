@@ -7,16 +7,25 @@ directories:
     output: dist
 
 files:
-    - 'dist/**/*'
-    - 'electron/**/*'
+    - dist/**/*
+    - electron/**/*
+    - public/**/*
     - 'package.json'
+
+extraFiles:
+    - from: src/assets
+      to: dist
+      filter:
+          - '**/*.pdf'
+          - '**/*.html'
+          - '**/*.png'
 
 mac:
     category: public.app-category.education
     target:
         - target: dmg
-        - target: zip
-    icon: build/icon.icns
+    icon: src/assets/Logo.png
+    darkModeSupport: true
     hardenedRuntime: true
     gatekeeperAssess: false
     entitlements: build/entitlements.mac.plist
@@ -40,13 +49,23 @@ dmg:
 win:
     target:
         - target: nsis
-    icon: build/icon.ico
+    icon: src/assets/Logo.png
 
 linux:
     target:
         - target: AppImage
+        - target: deb
     icon: build/icon.png
 
 publish:
     provider: github
     releaseType: draft
+
+asar: true
+
+nsis:
+    oneClick: false
+    allowToChangeInstallationDirectory: true
+    createDesktopShortcut: true
+    createStartMenuShortcut: true
+    shortcutName: Graduable

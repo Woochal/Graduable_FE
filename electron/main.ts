@@ -80,6 +80,8 @@ if (!app.isPackaged) {
     app.commandLine.appendSwitch('disable-features', 'OutOfBlinkCors');
     app.commandLine.appendSwitch('disable-web-security');
     app.commandLine.appendSwitch('allow-running-insecure-content');
+    app.commandLine.appendSwitch('disable-features', 'CrossOriginOpenerPolicy');
+    app.commandLine.appendSwitch('disable-features', 'CrossOriginEmbedderPolicy');
 }
 
 if (!app.isPackaged) {
@@ -105,6 +107,14 @@ async function ensureMainWindow() {
 
 app.whenReady().then(() => {
     // 프로토콜 핸들러 등록
+    protocol.registerFileProtocol(
+        'file',
+        (request: Electron.ProtocolRequest, callback: (response: Electron.ProtocolResponse) => void) => {
+            const url = request.url.substr(7);
+            callback({ path: path.normalize(`${__dirname}/${url}`) });
+        }
+    );
+
     protocol.registerHttpProtocol(
         'http',
         (request: Electron.ProtocolRequest, callback: (response: Electron.ProtocolResponse) => void) => {
@@ -156,41 +166,6 @@ app.whenReady().then(() => {
             } catch (error) {
                 log('Error in HTTP protocol handler:', error);
                 callback({ url });
-            }
-        }
-    );
-
-    protocol.registerFileProtocol(
-        'file',
-        (request: Electron.ProtocolRequest, callback: (response: Electron.ProtocolResponse) => void) => {
-            const url = request.url;
-            log('File protocol request received:', url);
-
-            try {
-                if (url.includes('/auth')) {
-                    log('Auth redirect detected in file protocol:', url);
-                    if (!mainWindow) {
-                        log('Main window not found, creating new window');
-                        createMainWindow();
-                    }
-
-                    const code = new URL(url).searchParams.get('code');
-                    log('Extracted code from file protocol:', code);
-
-                    if (code) {
-                        const indexPath = join(__dirname, '../index.html');
-                        log('Loading file with code:', code);
-                        mainWindow?.loadFile(indexPath, {
-                            query: { code },
-                        });
-                    }
-                    return;
-                }
-
-                callback({ path: url });
-            } catch (error) {
-                log('Error in File protocol handler:', error);
-                callback({ path: url });
             }
         }
     );
@@ -249,11 +224,11 @@ const createMainWindow = async () => {
             webPreferences: {
                 nodeIntegration: false,
                 contextIsolation: true,
-                preload: join(__dirname, 'preload.js'),
+                webviewTag: true,
                 webSecurity: false,
                 allowRunningInsecureContent: true,
-                webviewTag: true,
-                partition: 'persist:main',
+                preload: join(__dirname, 'preload.js'),
+                plugins: true,
             },
         });
 
@@ -363,6 +338,11 @@ ipcMain.handle('set-store-value', (_: Electron.IpcMainInvokeEvent, key: string, 
 
 ipcMain.handle('remove-store-value', (_: Electron.IpcMainInvokeEvent, key: string) => {
     store.delete(key);
+});
+
+// 앱의 실제 경로 반환
+ipcMain.handle('get-app-path', () => {
+    return app.getAppPath();
 });
 
 // 로그아웃 핸들러

@@ -39,12 +39,15 @@ export const PDFContainer = styled.div`
     width: clamp(300px, 95%, 1000px);
     height: clamp(300px, calc(100% - 1.5rem), 650px);
     margin-top: clamp(0.25rem, 0.5vh, 0.75rem);
+    background-color: white;
     border-radius: clamp(0.75rem, 1.5vw, 0.9375rem);
-    overflow: hidden;
-    align-self: center;
+    overflow-y: auto;
+    overflow-x: hidden;
     display: flex;
     justify-content: center;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    align-items: flex-start;
+    padding: 1rem;
+    box-sizing: border-box;
 `;
 
 export const Button = styled.button`

@@ -9,16 +9,11 @@ const RoadmapCourse = ({courseData} : {courseData: RoadmapCourseDataType[]}) => 
 
   return (
     <S.RoadmapCourse>
-      <S.RoadmapMajor>
-        {categoryData.map((course, index) => (
+      <S.RoadmapCourseGrid>
+        {courseData.map((course, index) => (
           <Course key={index} {...course} />
         ))}
-      </S.RoadmapMajor>
-      <S.RoadmapLiberal>
-        {liberalData.map((course, index) => (
-          <Course key={index} {...course} />
-        ))}
-      </S.RoadmapLiberal>
+      </S.RoadmapCourseGrid>
     </S.RoadmapCourse>
   );
 };

@@ -98,8 +98,8 @@ const Roadmap = () => {
         if (semesterToDelete) {
             try {
                 // 서버에서 7을 보내면 6학기를 삭제하는 중
-                console.log('Deleting semester:', semesterToDelete - 1);
-                const response = await deleteSemesterRoadmapAPI(userData.googleId, semesterToDelete - 1);
+                console.log('Deleting semester:', semesterToDelete);
+                const response = await deleteSemesterRoadmapAPI(userData.googleId, semesterToDelete);
                 console.log('Delete response:', response);
                 setDeleteModalOpen(false);
                 setSemesterToDelete(null);

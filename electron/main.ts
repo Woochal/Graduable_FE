@@ -245,6 +245,7 @@ const createMainWindow = async () => {
             x: windowConfig.x,
             y: windowConfig.y,
             icon: join(__dirname, '../../src/assets/Logo.png'),
+            useContentSize: true,
             webPreferences: {
                 nodeIntegration: false,
                 contextIsolation: true,
@@ -305,7 +306,7 @@ const createMainWindow = async () => {
         );
 
         // 개발자 도구 자동 열기
-        mainWindow.webContents.openDevTools();
+        // mainWindow.webContents.openDevTools();
 
         // 페이지 로드 이벤트 리스너
         mainWindow.webContents.on('did-finish-load', () => {

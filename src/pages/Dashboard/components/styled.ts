@@ -310,6 +310,23 @@ export const RoadmapCourse = styled.div`
     /* border: 1px solid red; */
 `;
 
+export const RoadmapCourseGrid = styled.div`
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: 0.938vw;
+    row-gap: 0.313vw;
+    align-content: start;
+    overflow-y: scroll;
+    gap: 0.313vw;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+    /* border: 1px solid red; */
+`;
+
 export const RoadmapMajor = styled.div`
     width: 15.469vw;
     height: 100%;

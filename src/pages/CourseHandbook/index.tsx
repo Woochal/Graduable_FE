@@ -1,6 +1,6 @@
 import React from 'react';
 import { Container, HandbookBox, Title, PDFContainer } from './components/styled';
-import courseHandbookPng from '../../assets/coursehandbook.png';
+import courseHandbookPng from '/coursehandbook.png?url';
 
 const CourseHandbook = () => {
     return (

@@ -1,6 +1,6 @@
 import React from 'react';
 import * as S from './components/styled';
-import curriculumChart from '../../assets/curriculumchart.png';
+import curriculumChart from '/curriculumchart.png?url';
 
 export default function Curriculum() {
     return (

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import styled from 'styled-components';
-import Graduate from '../../assets/Logo.png';
+import Graduate from '/Logo.png?url';
 import { KAKAO_CONFIG, initKakao } from '../../lib/kakao';
 import { userDataRecoil } from '../../atom/UserAtom';
 import { useRecoilState } from 'recoil';
